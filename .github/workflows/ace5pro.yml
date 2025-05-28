@@ -133,12 +133,24 @@ jobs:
          fi
 
       - name: Set CONFIG_LOCALVERSION
-        if: ${{ inputs.local_version != '-4k' }}
         run: |
          cd kernel_workspace/kernel_platform
-         echo "Using local_version: ${{ inputs.local_version }}"
-         sed -i "s/CONFIG_LOCALVERSION=\"-4k\"/CONFIG_LOCALVERSION=\"${{ inputs.local_version }}\"/" ./common/arch/arm64/configs/gki_defconfig
-           
+         RAW_VERSION='${{ inputs.local_version }}'
+         TRIMMED_VERSION="$(echo "$RAW_VERSION" | tr -d '[:space:]')"
+    
+         echo "输入的 local_version: '$RAW_VERSION'"
+         echo "去空白后的 local_version: '$TRIMMED_VERSION'"
+
+         if [ -z "$TRIMMED_VERSION" ]; then
+         echo "输入为空，删除 CONFIG_LOCALVERSION"
+         sed -i '/^CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
+         elif [ "$TRIMMED_VERSION" = "-4k" ]; then
+          echo "为默认值 -4k，跳过修改"
+         else
+          echo "设置 CONFIG_LOCALVERSION 为 '$RAW_VERSION'"
+          sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$RAW_VERSION\"/" ./common/arch/arm64/configs/gki_defconfig
+         fi
+
       - name: Add SUSFS Configuration Settings
         run: |
           cd kernel_workspace/kernel_platform
