@@ -32,7 +32,7 @@ on:
         default: false
         type: boolean
       local_version:
-        description: '是否修改内核后缀名？ (默认"-4k")'
+        description: '是否修改内核后缀名？ (默认"-4k",留空则删除-4k)'
         required: false
         default: '-4k'
         type: string
@@ -132,22 +132,31 @@ jobs:
          echo "❗ lz4kd patch not found for kernel version ${{ inputs.KERNEL_VERSION }}"
          fi
 
-      - name: Set CONFIG_LOCALVERSION
+      - name: Update kernel config
         run: |
-         # 直接从 GitHub Actions 输入获取值
+         # 获取输入值
          RAW_VERSION="${{ inputs.local_version }}" 
+         # 特殊处理：当输入是默认值"-4k"且未修改时，视为跳过
+         # 如果用户修改了输入（即使还是输入了-4k），也按实际输入处理
+         IS_DEFAULT="false"
+         if [ "$RAW_VERSION" = "-4k" ]; then
+         IS_DEFAULT="true"
+         fi     
          # 移除首尾空格
-         TRIMMED_VERSION="$(echo -n "$RAW_VERSION" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-         echo "输入的 local_version: '$RAW_VERSION'"
-         echo "处理后的 local_version: '$TRIMMED_VERSION'"  
+         TRIMMED_VERSION="$(echo -n "$RAW_VERSION" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"   
+         echo "原始输入: '$RAW_VERSION'"
+         echo "修剪后: '$TRIMMED_VERSION'"
+         echo "是否默认值: $IS_DEFAULT"     
          if [ -z "$TRIMMED_VERSION" ]; then
-         echo "输入为空，删除 CONFIG_LOCALVERSION"
-         sed -i '/^CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
+          echo "输入为空，删除 CONFIG_LOCALVERSION"
+          sed -i '/^CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
+         elif [ "$IS_DEFAULT" = "true" ]; then
+          echo "为默认值 -4k，跳过修改"
          elif [ "$TRIMMED_VERSION" = "-4k" ]; then
-         echo "为默认值 -4k，跳过修改"
+          echo "用户手动输入 -4k，跳过修改"
          else
-         echo "设置 CONFIG_LOCALVERSION 为 '$TRIMMED_VERSION'"
-         sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$TRIMMED_VERSION\"/" ./common/arch/arm64/configs/gki_defconfig
+          echo "设置 CONFIG_LOCALVERSION 为 '$TRIMMED_VERSION'"
+          sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$TRIMMED_VERSION\"/" ./common/arch/arm64/configs/gki_defconfig
          fi
 
       - name: Add SUSFS Configuration Settings
