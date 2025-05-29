@@ -223,26 +223,30 @@ jobs:
          export SOURCE_DATE_EPOCH=$(date -d "2024-12-17 23:36:49 UTC" +%s)
          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
    
-      - name: Build kernel (defconfig + Image)
+      - name: Set up environment variables
         run: |
-          cd kernel_workspace/kernel_platform/common
+          # 把 clang 和 ccache 路径加入 PATH
+          export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:/usr/lib/ccache:$PATH"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Configure kernel build timestamp
+        if: ${{ github.event.inputs.KERNEL_TIME != '' }}
+        run: |
+          export SOURCE_DATE_EPOCH=$(date -d "${{ github.event.inputs.KERNEL_TIME }}" +%s)
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Build kernel
+        working-directory: kernel_workspace/kernel_platform/common
+        run: |
           make -j$(nproc) LLVM=1 ARCH=arm64 \
             CROSS_COMPILE=aarch64-linux-gnu- \
             CC=clang \
             RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
             PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
             LD=ld.lld HOSTLD=ld.lld \
-            O=out KCFLAGS+=-Wno-error \
-            gki_defconfig
-
-          make -j$(nproc) LLVM=1 ARCH=arm64 \
-            CROSS_COMPILE=aarch64-linux-gnu- \
-            CC=clang \
-            RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
-            PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-            LD=ld.lld HOSTLD=ld.lld \
-            O=out KCFLAGS+=-Wno-error
-
+            O=out KCFLAGS+=-Wno-error gki_defconfig all
           mkdir -p ../dist
           cp out/arch/arm64/boot/Image ../dist/
 
