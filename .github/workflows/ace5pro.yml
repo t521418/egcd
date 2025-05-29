@@ -76,13 +76,6 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
         shell: bash
 
-      - name: Configure kernel build timestamp
-        if: ${{ github.event.inputs.KERNEL_TIME != '' }}
-        run: |
-          export SOURCE_DATE_EPOCH=$(date -d "${{ github.event.inputs.KERNEL_TIME }}" +%s)
-          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
-        shell: bash
-
       - name: Install repo tool
         run: |
          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/repo
