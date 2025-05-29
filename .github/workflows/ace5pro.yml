@@ -250,3 +250,9 @@ jobs:
         with:
          name: AnyKernel3_oneplus_ace5pro_${{ env.KSUVER }}
          path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
+         
+      - name: Upload boot.img
+        uses: actions/upload-artifact@v4
+        with:
+         name: boot.img
+         path: kernel_workspace/kernel_platform/dist/boot.img
