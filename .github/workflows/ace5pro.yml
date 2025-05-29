@@ -32,7 +32,7 @@ on:
         default: false
         type: boolean
       local_version:
-        description: '输入内核后缀名（例如 🤓、-v8、自定义表情等）'
+        description: '输入内核后缀名（如-v8）'
         required: false
         default: '-4k'
         type: string
@@ -245,9 +245,3 @@ jobs:
         with:
          name: AnyKernel3_oneplus_ace5pro_${{ env.KSUVER }}
          path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
-         
-      - name: Upload boot.img
-        uses: actions/upload-artifact@v4
-        with:
-         name: boot.img
-         path: kernel_workspace/kernel_platform/dist/boot.img
