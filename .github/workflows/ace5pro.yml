@@ -31,12 +31,17 @@ on:
         required: false
         default: false
         type: boolean
+      inputs:
       local_version:
-        description: '是否修改内核后缀名？ (默认"-4k",留空则删除-4k)'
+        description: '输入内核后缀名（例如 🤓、-v8、自定义表情等）'
         required: false
         default: '-4k'
         type: string
-        
+      remove_default_4k:
+        description: '是否删除默认的 -4k 后缀？（勾选则删除）'
+        required: false
+        default: false
+        type: boolean        
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -132,31 +137,22 @@ jobs:
          echo "❗ lz4kd patch not found for kernel version ${{ inputs.KERNEL_VERSION }}"
          fi
 
-      - name: Update kernel config
+      - name: Set CONFIG_LOCALVERSION
         run: |
-         # 获取输入值
-         RAW_VERSION="${{ inputs.local_version }}" 
-         # 特殊处理：当输入是默认值"-4k"且未修改时，视为跳过
-         # 如果用户修改了输入（即使还是输入了-4k），也按实际输入处理
-         IS_DEFAULT="false"
-         if [ "$RAW_VERSION" = "-4k" ]; then
-         IS_DEFAULT="true"
-         fi     
-         # 移除首尾空格
-         TRIMMED_VERSION="$(echo -n "$RAW_VERSION" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"   
-         echo "原始输入: '$RAW_VERSION'"
-         echo "修剪后: '$TRIMMED_VERSION'"
-         echo "是否默认值: $IS_DEFAULT"     
-         if [ -z "$TRIMMED_VERSION" ]; then
-          echo "输入为空，删除 CONFIG_LOCALVERSION"
-          sed -i '/^CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
-         elif [ "$IS_DEFAULT" = "true" ]; then
-          echo "为默认值 -4k，跳过修改"
-         elif [ "$TRIMMED_VERSION" = "-4k" ]; then
-          echo "用户手动输入 -4k，跳过修改"
+         cd kernel_workspace/kernel_platform
+         RAW_VERSION="${{ inputs.local_version }}"
+         TRIMMED_VERSION="$(echo "$RAW_VERSION" | tr -d '[:space:]')"
+
+         if [ "${{ inputs.remove_default_4k }}" = "true" ]; then
+           echo "勾选了删除默认 '-4k' 后缀，移除 CONFIG_LOCALVERSION"
+           sed -i '/^CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
+
+         elif [ "$TRIMMED_VERSION" = "" ] || [ "$TRIMMED_VERSION" = "-4k" ]; then
+           echo "未输入版本名或输入的是默认值 '-4k'，跳过修改"
+
          else
-          echo "设置 CONFIG_LOCALVERSION 为 '$TRIMMED_VERSION'"
-          sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$TRIMMED_VERSION\"/" ./common/arch/arm64/configs/gki_defconfig
+           echo "设置 CONFIG_LOCALVERSION 为原始输入：'$RAW_VERSION'"
+           sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$RAW_VERSION\"/" ./common/arch/arm64/configs/gki_defconfig
          fi
 
       - name: Add SUSFS Configuration Settings
