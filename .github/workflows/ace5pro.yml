@@ -31,7 +31,6 @@ on:
         required: false
         default: false
         type: boolean
-      inputs:
       local_version:
         description: '输入内核后缀名（例如 🤓、-v8、自定义表情等）'
         required: false
