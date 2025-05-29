@@ -217,10 +217,20 @@ jobs:
          export SOURCE_DATE_EPOCH=$(date -d "2024-12-17 23:36:49 UTC" +%s)
          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
    
-      - name: Build kernel
+      - name: Build kernel (uncompressed Image only)
         run: |
          cd kernel_workspace/kernel_platform
-         tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
+
+         # 构建 Image（非 dist 打包方式）
+         tools/bazel build \
+           --config=fast \
+           --config=stamp \
+           --lto=thin \
+           //common:kernel_aarch64
+
+         # 输出路径保持不变，复制到 dist 并重命名
+         mkdir -p dist
+         cp bazel-bin/common/kernel_aarch64 dist/Image
 
       - name: Make AnyKernel3
         if: ${{ fromJSON(github.event.inputs.ENABLE_KPM) }}
@@ -239,7 +249,7 @@ jobs:
          rm -rf AnyKernel3/.git
          rm -f AnyKernel3/push.sh
          cp Image AnyKernel3/
-                         
+
       - name: Upload AnyKernel3
         uses: actions/upload-artifact@v4
         with:
