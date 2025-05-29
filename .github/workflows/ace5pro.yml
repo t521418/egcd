@@ -223,32 +223,38 @@ jobs:
          export SOURCE_DATE_EPOCH=$(date -d "2024-12-17 23:36:49 UTC" +%s)
          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
    
-      - name: Set up environment variables
+      - name: Build Kernel
         run: |
-          # 把 clang 和 ccache 路径加入 PATH
-          export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:/usr/lib/ccache:$PATH"
-          echo "PATH=$PATH" >> $GITHUB_ENV
-        shell: bash
+         # 把 prebuilts clang 加入 PATH
+         export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
+         # 把 ccache 加入 PATH
+         export PATH="/usr/lib/ccache:$PATH"
 
-      - name: Configure kernel build timestamp
-        if: ${{ github.event.inputs.KERNEL_TIME != '' }}
-        run: |
-          export SOURCE_DATE_EPOCH=$(date -d "${{ github.event.inputs.KERNEL_TIME }}" +%s)
-          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
-        shell: bash
+         # 安装依赖
+         sudo apt-get update
+         sudo apt-get install -y libelf-dev
 
-      - name: Build kernel
-        working-directory: kernel_workspace/kernel_platform/common
-        run: |
-          make -j$(nproc) LLVM=1 ARCH=arm64 \
-            CROSS_COMPILE=aarch64-linux-gnu- \
-            CC=clang \
-            RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
-            PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-            LD=ld.lld HOSTLD=ld.lld \
-            O=out KCFLAGS+=-Wno-error gki_defconfig all
-          mkdir -p ../dist
-          cp out/arch/arm64/boot/Image ../dist/
+         # 进入源码目录
+         cd kernel_workspace/kernel_platform/common
+
+         # 先执行 defconfig 配置
+         make -j$(nproc) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
+         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
+         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
+         LD=ld.lld HOSTLD=ld.lld \
+         O=out KCFLAGS="-Wno-error" gki_defconfig
+
+         # 然后编译全部目标
+         make -j$(nproc) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
+         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
+         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
+         LD=ld.lld HOSTLD=ld.lld \
+         O=out KCFLAGS="-Wno-error" all
+
+         # 创建输出目录并复制Image
+         mkdir -p ../dist
+         cp out/arch/arm64/boot/Image ../dist/
+         shell: bash
 
       - name: Make AnyKernel3 patch (optional)
         if: ${{ fromJSON(github.event.inputs.ENABLE_KPM) }}
