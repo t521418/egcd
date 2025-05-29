@@ -69,6 +69,19 @@ jobs:
         run: |
          sudo apt update && sudo apt upgrade -y
          sudo apt install -y python3 git curl
+         
+      - name: Set up environment variables
+        run: |
+          export PATH="/usr/lib/ccache:$PATH"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Configure kernel build timestamp
+        if: ${{ github.event.inputs.KERNEL_TIME != '' }}
+        run: |
+          export SOURCE_DATE_EPOCH=$(date -d "${{ github.event.inputs.KERNEL_TIME }}" +%s)
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+        shell: bash
 
       - name: Install repo tool
         run: |
@@ -217,41 +230,49 @@ jobs:
          export SOURCE_DATE_EPOCH=$(date -d "2024-12-17 23:36:49 UTC" +%s)
          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
    
-      - name: Build kernel (uncompressed Image only)
+      - name: Build kernel (defconfig + Image)
         run: |
-         cd kernel_workspace/kernel_platform
+          cd kernel_workspace/kernel_platform/common
+          make -j$(nproc) LLVM=1 ARCH=arm64 \
+            CROSS_COMPILE=aarch64-linux-gnu- \
+            CC=clang \
+            RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
+            PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
+            LD=ld.lld HOSTLD=ld.lld \
+            O=out KCFLAGS+=-Wno-error \
+            gki_defconfig
 
-         # 构建 Image（非 dist 打包方式）
-         tools/bazel build \
-           --config=fast \
-           --config=stamp \
-           --lto=thin \
-           //common:kernel_aarch64
+          make -j$(nproc) LLVM=1 ARCH=arm64 \
+            CROSS_COMPILE=aarch64-linux-gnu- \
+            CC=clang \
+            RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
+            PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
+            LD=ld.lld HOSTLD=ld.lld \
+            O=out KCFLAGS+=-Wno-error
 
-         # 输出路径保持不变，复制到 dist 并重命名
-         mkdir -p dist
-         cp bazel-bin/common/kernel_aarch64 dist/Image
+          mkdir -p ../dist
+          cp out/arch/arm64/boot/Image ../dist/
 
-      - name: Make AnyKernel3
+      - name: Make AnyKernel3 patch (optional)
         if: ${{ fromJSON(github.event.inputs.ENABLE_KPM) }}
         run: |
-         cd kernel_workspace/kernel_platform/dist/
-         curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
-         chmod +x patch_linux
-         ./patch_linux
-         rm -f Image
-         mv oImage Image
+          cd kernel_workspace/kernel_platform/dist
+          curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
+          chmod +x patch_linux
+          ./patch_linux
+          rm -f Image
+          mv oImage Image
 
-      - name: Prepare AnyKernel3 Packages
+      - name: Prepare AnyKernel3 package
         run: |
-         cd kernel_workspace/kernel_platform/dist
-         git clone https://github.com/egcd123/AnyKernel3.git AnyKernel3 --depth=1
-         rm -rf AnyKernel3/.git
-         rm -f AnyKernel3/push.sh
-         cp Image AnyKernel3/
+          cd kernel_workspace/kernel_platform/dist
+          git clone https://github.com/egcd123/AnyKernel3.git AnyKernel3 --depth=1
+          rm -rf AnyKernel3/.git
+          rm -f AnyKernel3/push.sh
+          cp Image AnyKernel3/
 
-      - name: Upload AnyKernel3
+      - name: Upload AnyKernel3 artifact
         uses: actions/upload-artifact@v4
         with:
-         name: AnyKernel3_oneplus_ace5pro_${{ env.KSUVER }}
-         path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
+          name: AnyKernel3_oneplus_ace5pro_${{ github.event.inputs.KSUVER }}
+          path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
