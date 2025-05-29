@@ -254,7 +254,6 @@ jobs:
          # 创建输出目录并复制Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
-         shell: bash
 
       - name: Make AnyKernel3 patch (optional)
         if: ${{ fromJSON(github.event.inputs.ENABLE_KPM) }}
