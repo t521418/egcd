@@ -160,24 +160,6 @@ jobs:
          echo "❗ lz4kd patch not found for kernel version ${{ inputs.KERNEL_VERSION }}"
          fi
 
-      - name: Set CONFIG_LOCALVERSION
-        run: |
-         cd kernel_workspace/kernel_platform
-         RAW_VERSION="${{ inputs.local_version }}"
-         TRIMMED_VERSION="$(echo "$RAW_VERSION" | tr -d '[:space:]')"
-
-         if [ "${{ inputs.remove_default_4k }}" = "true" ]; then
-           echo "勾选了删除默认 '-4k' 后缀，移除 CONFIG_LOCALVERSION"
-           sed -i '/^CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
-
-         elif [ "$TRIMMED_VERSION" = "" ] || [ "$TRIMMED_VERSION" = "-4k" ]; then
-           echo "未输入版本名或输入的是默认值 '-4k'，跳过修改"
-
-         else
-           echo "设置 CONFIG_LOCALVERSION 为原始输入：'$RAW_VERSION'"
-           sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$RAW_VERSION\"/" ./common/arch/arm64/configs/gki_defconfig
-         fi
-
       - name: Add SUSFS Configuration Settings
         run: |
           cd kernel_workspace/kernel_platform
@@ -221,16 +203,29 @@ jobs:
          sudo sed -i 's/check_defconfig//' ./common/build.config.gki
          cd common
          git add -A && git commit -a -m "BUILD Kernel"
-         
-      - name: Clean git state (to avoid dirty tag)
-        run: |
-         cd kernel_workspace/kernel_platform
-         git restore . || true
 
       - name: Replace scm_version with kernel name
         run: |
          cd kernel_workspace/kernel_platform
          sed -i "s/\${scm_version}/${{ github.event.inputs.KERNEL_NAME }}/g" ./common/scripts/setlocalversion
+
+      - name: Set CONFIG_LOCALVERSION
+        run: |
+         cd kernel_workspace/kernel_platform
+         RAW_VERSION="${{ inputs.local_version }}"
+         TRIMMED_VERSION="$(echo "$RAW_VERSION" | tr -d '[:space:]')"
+
+         if [ "${{ inputs.remove_default_4k }}" = "true" ]; then
+           echo "勾选了删除默认 '-4k' 后缀，移除 CONFIG_LOCALVERSION"
+           sed -i '/^CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
+
+         elif [ "$TRIMMED_VERSION" = "" ] || [ "$TRIMMED_VERSION" = "-4k" ]; then
+           echo "未输入版本名或输入的是默认值 '-4k'，跳过修改"
+
+         else
+           echo "设置 CONFIG_LOCALVERSION 为原始输入：'$RAW_VERSION'"
+           sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$RAW_VERSION\"/" ./common/arch/arm64/configs/gki_defconfig
+         fi
     
       - name: Add sched_ext
         run: |
