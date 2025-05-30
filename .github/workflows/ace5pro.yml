@@ -204,12 +204,10 @@ jobs:
          cd common
          git add -A && git commit -a -m "BUILD Kernel"
 
-      - name: Replace scm_version with kernel name
+      - name: Add make name
         run: |
          cd kernel_workspace/kernel_platform
-         FULL_KERNEL_NAME="6.6.30${{ github.event.inputs.KERNEL_NAME }}"
-         KERNEL_NAME_MODIFIED=$(echo "$FULL_KERNEL_NAME" | sed 's/^6\.6\.30/\1-custom/')
-         sed -i "s/\${scm_version}/$KERNEL_NAME_MODIFIED/g" ./common/scripts/setlocalversion
+         sed -i 's/res="\$res\$(cat "\$file")"/res="${{ github.event.inputs.KERNEL_NAME }}"/g' ./common/scripts/setlocalversion
          
       - name: Set CONFIG_LOCALVERSION
         run: |
