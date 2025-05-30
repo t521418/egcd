@@ -40,7 +40,7 @@ on:
         description: '是否删除默认的 -4k 后缀？（勾选则删除）'
         required: false
         default: false
-        type: boolean        
+        type: string        
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -209,22 +209,22 @@ jobs:
          cd kernel_workspace/kernel_platform
          sed -i 's/res="\$res\$(cat "\$file")"/res="${{ github.event.inputs.KERNEL_NAME }}"/g' ./common/scripts/setlocalversion
          
-      - name: Set CONFIG_LOCALVERSION
+      - name: Set custom localversion suffix
         run: |
-         cd kernel_workspace/kernel_platform
-         RAW_VERSION="${{ inputs.local_version }}"
-         TRIMMED_VERSION="$(echo "$RAW_VERSION" | tr -d '[:space:]')"
+         RAW_VERSION="${{ github.event.inputs.local_version }}"
+         # 默认值是 "-4k"，但如果用户勾选了删除选项，就清空它
+         if [ "${{ github.event.inputs.remove_default_4k }}" = "true" ]; then
+          RAW_VERSION=""
+         fi
 
-         if [ "${{ inputs.remove_default_4k }}" = "true" ]; then
-           echo "勾选了删除默认 '-4k' 后缀，移除 CONFIG_LOCALVERSION"
-           sed -i '/^CONFIG_LOCALVERSION=/d' ./common/arch/arm64/configs/gki_defconfig
+         echo "设置 CONFIG_LOCALVERSION 为: \"$RAW_VERSION\""
 
-         elif [ "$TRIMMED_VERSION" = "" ] || [ "$TRIMMED_VERSION" = "-4k" ]; then
-           echo "未输入版本名或输入的是默认值 '-4k'，跳过修改"
-
+         # 如果存在则替换，否则添加
+         DEFCONFIG=./common/arch/arm64/configs/gki_defconfig
+         if grep -q '^CONFIG_LOCALVERSION=' "$DEFCONFIG"; then
+         sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$RAW_VERSION\"/" "$DEFCONFIG"
          else
-           echo "设置 CONFIG_LOCALVERSION 为原始输入：'$RAW_VERSION'"
-           sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$RAW_VERSION\"/" ./common/arch/arm64/configs/gki_defconfig
+         echo "CONFIG_LOCALVERSION=\"$RAW_VERSION\"" >> "$DEFCONFIG"
          fi
     
       - name: Add sched_ext
