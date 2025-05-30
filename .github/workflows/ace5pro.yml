@@ -222,11 +222,16 @@ jobs:
          cd common
          git add -A && git commit -a -m "BUILD Kernel"
          
-      - name: Add make name
+      - name: Clean git state (to avoid dirty tag)
         run: |
          cd kernel_workspace/kernel_platform
-         sed -i 's/res="\$res\$(cat "\$file")"/res="${{ github.event.inputs.KERNEL_NAME }}"/g' ./common/scripts/setlocalversion
+         git restore . || true
 
+      - name: Set kernel version
+        run: |
+         cd kernel_workspace/kernel_platform
+         sed -i "s/^EXTRAVERSION =.*/EXTRAVERSION = ${{ github.event.inputs.KERNEL_NAME }}/" Makefile
+         
       - name: Add sched_ext
         run: |
          cd kernel_workspace/kernel_platform/
