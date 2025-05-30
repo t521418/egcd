@@ -222,6 +222,7 @@ jobs:
       - name: 写入 CONFIG_LOCALVERSION 到 defconfig
         run: |
           echo "设置 CONFIG_LOCALVERSION 为: \"$RAW_VERSION\""
+          cd kernel_workspace/kernel_platform
           DEFCONFIG=./common/arch/arm64/configs/gki_defconfig
           if grep -q '^CONFIG_LOCALVERSION=' "$DEFCONFIG"; then
             sed -i "s/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=\"$RAW_VERSION\"/" "$DEFCONFIG"
