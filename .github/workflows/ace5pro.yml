@@ -207,7 +207,7 @@ jobs:
       - name: Add make name
         run: |
          cd kernel_workspace/kernel_platform
-         sed -i 's/res="\$res\$(cat "\$file")"/res="${{ github.event.inputs.KERNEL_NAME }}"/g' ./common/scripts/setlocalversion
+         sed -i "s/\${scm_version}/$KERNEL_NAME_MODIFIED/g" ./common/scripts/setlocalversion
          
       - name: 设置默认 RAW_VERSION（local_version 输入）
         if: ${{ !github.event.inputs.remove_default_4k }}
