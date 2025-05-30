@@ -282,5 +282,5 @@ jobs:
       - name: Upload AnyKernel3 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AnyKernel3_oneplus_ace5pro_${{ github.event.inputs.KSUVER }}
+          name: AnyKernel3_oneplus_ace5pro_${{ env.KSUVER }}
           path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
