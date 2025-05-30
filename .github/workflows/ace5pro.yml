@@ -238,33 +238,30 @@ jobs:
    
       - name: Build Kernel
         run: |
-         # 把 prebuilts clang 加入 PATH
+         # 加入 clang 到 PATH
          export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-         # 把 ccache 加入 PATH
-         export PATH="/usr/lib/ccache:$PATH"
-
+         # 加入 ccache 到 PATH
+         export PATH="/usr/lib/ccache:$PATH"  
          # 安装依赖
          sudo apt-get update
          sudo apt-get install -y libelf-dev
 
+         # 设置一些通用参数（便于后续维护）
+         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
+         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
+         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
+         LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=-Wno-error"
+
          # 进入源码目录
          cd kernel_workspace/kernel_platform/common
 
-         # 先执行 defconfig 配置
-         make -j$(nproc) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
-         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
-         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-         LD=ld.lld HOSTLD=ld.lld \
-         O=out KCFLAGS="-Wno-error" gki_defconfig
+         # 执行 defconfig
+         make -j$(nproc) $MAKE_ARGS gki_defconfig
 
-         # 然后编译全部目标
-         make -j$(nproc) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
-         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
-         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-         LD=ld.lld HOSTLD=ld.lld \
-         O=out KCFLAGS="-Wno-error" all
+         # 编译全部目标
+         make -j$(nproc) $MAKE_ARGS all
 
-         # 创建输出目录并复制Image
+         # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
 
