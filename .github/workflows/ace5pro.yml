@@ -209,6 +209,12 @@ jobs:
          cd common
          git add -A && git commit -a -m "BUILD Kernel"
 
+      - name: 修改内核版本号为 6.6.66
+        run: |
+         cd kernel_workspace/kernel_platform/common
+         sed -i '3s/^SUBLEVEL.*/SUBLEVEL = 66/' Makefile
+         cd ../
+
       - name: Add make name
         run: |
          cd kernel_workspace/kernel_platform
