@@ -164,18 +164,6 @@ jobs:
          else
          echo "❗ lz4kd patch not found for kernel version ${{ inputs.KERNEL_VERSION }}"
          fi
-         
-      - name: Apply Iz4k_oplus.patch
-        run: |
-         set -e
-         cd kernel_workspace/kernel_platform/common
-         PATCH_FILE=../../SukiSU_patch/other/zram/zram_patch/${{ inputs.KERNEL_VERSION }}/Iz4k_oplus.patch
-         if [[ -f "$PATCH_FILE" ]]; then
-         cp "$PATCH_FILE" ./Iz4k_oplus.patch
-         patch -p1 -F 3 < Iz4k_oplus.patch || true
-         else
-         echo "❗ Iz4k_oplus patch not found for kernel version ${{ inputs.KERNEL_VERSION }}"
-         fi
 
       - name: Add SUSFS Configuration Settings
         run: |
