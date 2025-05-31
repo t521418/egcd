@@ -247,30 +247,38 @@ jobs:
       # 5. 编译内核
       - name: Build Kernel
         run: |
+         # 加入 clang 到 PATH
          export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-         export PATH="/usr/lib/ccache:$PATH"    
-         # 设置统一内核时间戳
+         # 加入 ccache 到 PATH
+         export PATH="/usr/lib/ccache:$PATH" 
+
+         # 设置固定内核构建时间
          export KERNEL_TIME="Tue Dec 17 23:36:49 UTC 2024"
          export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"
          export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)
+
+         # 打印验证
          echo "KERNEL_TIME = $KERNEL_TIME"
          echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
-         # 内核构建相关变量
-         export LLVM=1
-         export ARCH=arm64
-         export CROSS_COMPILE=aarch64-linux-gnu-
-         export CC="ccache clang"
-         export RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc
-         export PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole
-         export LD=ld.lld
-         export HOSTLD=ld.lld
-         export O=out
-         export KCFLAGS=-Wno-error
 
+         # 设置一些通用参数（便于后续维护）
+         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
+         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
+         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
+         LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=-Wno-error \
+         SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
+         echo "Using SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
+
+         # 进入源码目录
          cd kernel_workspace/kernel_platform/common
-         make -j$(nproc) gki_defconfig
-         make -j$(nproc) all
 
+         # 执行 defconfig
+         make -j$(nproc) $MAKE_ARGS gki_defconfig
+
+         # 编译全部目标
+         make -j$(nproc) $MAKE_ARGS all
+
+         # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
          
