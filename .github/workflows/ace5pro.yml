@@ -80,16 +80,7 @@ jobs:
          sudo apt-get update  
          sudo apt-get install -y python3 git curl ccache libelf-dev  
 
-      # 3. 计算代码的哈希值并生成唯一缓存 key  
-      - name: Generate Cache Key  
-        id: cache_key
-        run: |
-         # 计算 .config 文件的 hash，确保每次源码变动都会影响缓存 key
-         CONFIG_HASH=$(cat kernel_workspace/kernel_platform/common/.config | sha256sum | cut -d' ' -f1)
-         echo "CACHE_KEY=ccache-${{ runner.os }}-${{ github.repository }}-${{ github.ref_name }}-${CONFIG_HASH}" >> $GITHUB_ENV
-         echo "CACHE_KEY=${{ env.CACHE_KEY }}"
-
-      # 4. 恢复 ccache 缓存  
+      # 3. 恢复 ccache 缓存  
       - name: Restore ccache  
         uses: actions/cache@v3  
         with:  
@@ -101,7 +92,7 @@ jobs:
           ccache-${{ runner.os }}-
           ccache-
 
-      # 5. 设置 ccache 环境变量  
+      # 4. 设置 ccache 环境变量  
       - name: Setup ccache environment  
         run: |  
          echo "CCACHE_DIR=/home/runner/.ccache" >> $GITHUB_ENV  
@@ -130,6 +121,15 @@ jobs:
          repo --trace sync -c -j$(nproc --all) --no-tags
          rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
          rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
+
+      # 5. 计算代码的哈希值并生成唯一缓存 key  
+      - name: Generate Cache Key  
+        id: cache_key
+        run: |
+         # 计算 .config 文件的 hash，确保每次源码变动都会影响缓存 key
+         CONFIG_HASH=$(cat kernel_workspace/kernel_platform/common/.config | sha256sum | cut -d' ' -f1)
+         echo "CACHE_KEY=ccache-${{ runner.os }}-${{ github.repository }}-${{ github.ref_name }}-${CONFIG_HASH}" >> $GITHUB_ENV
+         echo "CACHE_KEY=${{ env.CACHE_KEY }}"
          
       - name: Set up SukiSU
         run: |
