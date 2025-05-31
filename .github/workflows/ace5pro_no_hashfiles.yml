@@ -274,12 +274,7 @@ jobs:
          echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
 
          # ✅ 设置 MAKE_ARGS 时使用 $CC（ccache clang）而不是直接写 clang
-         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=\"$CC\" \
-         RUSTC=${{ github.workspace }}/prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
-         PAHOLE=${{ github.workspace }}/prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-         LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=-Wno-error \
-         SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
-
+         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=${{ github.workspace }}/prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=${{ github.workspace }}/prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=-Wno-error SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
          echo "Using SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
 
          # 进入源码目录
