@@ -76,16 +76,16 @@ jobs:
          sudo apt-get update
          sudo apt-get install -y python3 git curl ccache libelf-dev
 
-      # 2. 恢复 ccache 缓存（包含项目、workflow、分支信息）
+      # 2. 恢复 ccache 缓存（推荐使用较粗粒度的 key，便于共享）
       - name: Restore ccache
         uses: actions/cache@v3
         with:
-          path: /home/runner/.ccache
-          key: ccache-${{ runner.os }}-${{ github.repository }}-${{ github.workflow }}-${{ github.ref_name }}
-          restore-keys: |
-           ccache-${{ runner.os }}-${{ github.repository }}-${{ github.workflow }}-
-           ccache-${{ runner.os }}-${{ github.repository }}-
-           ccache-${{ runner.os }}-
+         path: /home/runner/.ccache
+         key: ccache-${{ runner.os }}-${{ github.repository }}-v1
+         restore-keys: |
+          ccache-${{ runner.os }}-${{ github.repository }}-
+          ccache-${{ runner.os }}-
+          ccache-
 
       # 3. 设置 ccache 环境变量
       - name: Setup ccache environment
@@ -95,6 +95,7 @@ jobs:
          echo "CCACHE_COMPILERCHECK=%compiler% -dumpmachine; %compiler% -dumpversion" >> $GITHUB_ENV
          echo "CCACHE_NOHASHDIR=true" >> $GITHUB_ENV
          echo "CCACHE_HARDLINK=true" >> $GITHUB_ENV
+         echo "CCACHE_BASEDIR=${{ github.workspace }}" >> $GITHUB_ENV   # ✅ 新增，提高缓存命中率
          echo "/usr/lib/ccache" >> $GITHUB_PATH
          
       - name: Show ccache stats
