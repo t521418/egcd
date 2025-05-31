@@ -285,10 +285,7 @@ jobs:
       # 6. 打印 ccache 使用统计
       - name: Show ccache stats
         run: ccache -s || true
-        
-      - name: Show ccache log
-        run: cat ${{ github.workspace }}/ccache.log || true
-        
+    
       # 7. 保存 ccache 缓存
       - name: Save ccache
         if: always()
