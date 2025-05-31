@@ -93,7 +93,7 @@ jobs:
         run: |
          echo "CCACHE_DIR=/home/runner/.ccache" >> $GITHUB_ENV
          echo "CCACHE_MAXSIZE=8G" >> $GITHUB_ENV
-         echo "CCACHE_COMPILERCHECK=%compiler% -dumpmachine; %compiler% -dumpversion" >> $GITHUB_ENV
+         echo "CCACHE_COMPILERCHECK=content" >> $GITHUB_ENV
          echo "CCACHE_NOHASHDIR=true" >> $GITHUB_ENV
          echo "CCACHE_HARDLINK=true" >> $GITHUB_ENV
          echo "CCACHE_BASEDIR=${{ github.workspace }}" >> $GITHUB_ENV
