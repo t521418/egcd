@@ -276,9 +276,6 @@ jobs:
          # 进入源码目录
          cd kernel_workspace/kernel_platform/common
 
-         # 打印当前目录内容
-         ls
-
          # 执行 defconfig
          make -j$(nproc) $MAKE_ARGS gki_defconfig
 
@@ -292,14 +289,6 @@ jobs:
       # 6. 打印 ccache 使用统计
       - name: Show ccache stats
         run: ccache -s || true
-    
-      # 7. 保存 ccache 缓存
-      - name: Save ccache
-        if: always()
-        uses: actions/cache/save@v3
-        with:
-         path: /home/runner/.ccache
-         key: ccache-${{ runner.os }}-${{ github.repository }}-${{ github.ref_name }}
 
       - name: 验证内核构建时间
         run: |
