@@ -81,11 +81,11 @@ jobs:
          sudo apt-get install -y python3 git curl ccache libelf-dev  
 
       # 3. 恢复 ccache 缓存  
-      - name: Restore ccache  
-        uses: actions/cache@v3  
-        with:  
-         path: /home/runner/.ccache  
-         key: ${{ env.CACHE_KEY }}  
+      - name: Restore ccache
+        uses: actions/cache@v3
+        with:
+         path: /home/runner/.ccache
+         key: ${{ runner.os }}-${{ github.repository }}-${{ github.ref_name }}-${{ hashFiles('**/*') }}
          restore-keys: |
           ccache-${{ runner.os }}-${{ github.repository }}-${{ github.ref_name }}-
           ccache-${{ runner.os }}-${{ github.repository }}-
