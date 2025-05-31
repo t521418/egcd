@@ -70,35 +70,48 @@ jobs:
          git config --global user.name "build"
          git config --global user.email "2106456897@qq.com"
 
-      # 1. 拉取仓库
-      - name: Checkout
-        uses: actions/checkout@v4
-      # 2. 安装构建依赖（包括 ccache）
-      - name: Install Dependencies
+      # 1. 拉取仓库  
+      - name: Checkout  
+        uses: actions/checkout@v4  
+
+      # 2. 安装构建依赖（包括 ccache）  
+      - name: Install Dependencies  
+        run: |  
+         sudo apt-get update  
+         sudo apt-get install -y python3 git curl ccache libelf-dev  
+
+      # 3. 计算代码的哈希值并生成唯一缓存 key  
+      - name: Generate Cache Key  
+        id: cache_key
         run: |
-         sudo apt-get update
-         sudo apt-get install -y python3 git curl ccache libelf-dev
-      # 3. 恢复 ccache 缓存（以项目级别区分）
-      - name: Restore ccache
-        uses: actions/cache@v3
-        with:
-         path: /home/runner/.ccache
-         key: ccache-${{ runner.os }}-${{ github.repository }}-v1
+         # 计算 .config 文件的 hash，确保每次源码变动都会影响缓存 key
+         CONFIG_HASH=$(cat kernel_workspace/kernel_platform/common/.config | sha256sum | cut -d' ' -f1)
+         echo "CACHE_KEY=ccache-${{ runner.os }}-${{ github.repository }}-${{ github.ref_name }}-${CONFIG_HASH}" >> $GITHUB_ENV
+         echo "CACHE_KEY=${{ env.CACHE_KEY }}"
+
+      # 4. 恢复 ccache 缓存  
+      - name: Restore ccache  
+        uses: actions/cache@v3  
+        with:  
+         path: /home/runner/.ccache  
+         key: ${{ env.CACHE_KEY }}  
          restore-keys: |
+          ccache-${{ runner.os }}-${{ github.repository }}-${{ github.ref_name }}-
           ccache-${{ runner.os }}-${{ github.repository }}-
           ccache-${{ runner.os }}-
           ccache-
-      # 4. 设置 ccache 环境变量
-      - name: Setup ccache environment
-        run: |
-         echo "CCACHE_DIR=/home/runner/.ccache" >> $GITHUB_ENV
-         echo "CCACHE_MAXSIZE=8G" >> $GITHUB_ENV
-         echo "CCACHE_COMPILERCHECK=content" >> $GITHUB_ENV
-         echo "CCACHE_NOHASHDIR=true" >> $GITHUB_ENV
-         echo "CCACHE_HARDLINK=true" >> $GITHUB_ENV
-         echo "CCACHE_BASEDIR=${{ github.workspace }}" >> $GITHUB_ENV
-         echo "CCACHE_LOGFILE=${{ github.workspace }}/ccache.log" >> $GITHUB_ENV
-         echo "/usr/lib/ccache" >> $GITHUB_PATH
+
+      # 5. 设置 ccache 环境变量  
+      - name: Setup ccache environment  
+        run: |  
+         echo "CCACHE_DIR=/home/runner/.ccache" >> $GITHUB_ENV  
+         echo "CCACHE_MAXSIZE=8G" >> $GITHUB_ENV  
+         echo "CCACHE_COMPILERCHECK=%compiler% -dumpmachine; %compiler% -dumpversion" >> $GITHUB_ENV  
+         echo "CCACHE_NOHASHDIR=true" >> $GITHUB_ENV  
+         echo "CCACHE_HARDLINK=true" >> $GITHUB_ENV  
+         echo "CCACHE_BASEDIR=${{ github.workspace }}" >> $GITHUB_ENV  
+         echo "CCACHE_LOGFILE=${{ github.workspace }}/ccache.log" >> $GITHUB_ENV  
+         echo "/usr/lib/ccache" >> $GITHUB_PATH  
          
       - name: Show ccache stats
         run: |
@@ -244,43 +257,37 @@ jobs:
          export SOURCE_DATE_EPOCH=$(date -d "Tue Dec 17 23:36:49 UTC 2024" +%s)
          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
          
-      # 5. 编译内核
-      - name: Build Kernel
-        run: |
-         # 加入 clang 到 PATH
-         export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-         # 加入 ccache 到 PATH
-         export PATH="/usr/lib/ccache:$PATH" 
+      # 5. 编译内核  
+      - name: Build Kernel  
+        run: |  
+         export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"  
+         export PATH="/usr/lib/ccache:$PATH"  
 
-         # 设置固定内核构建时间
-         export KERNEL_TIME="Tue Dec 17 23:36:49 UTC 2024"
-         export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"
-         export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)
+         # 设置固定内核构建时间  
+         export KERNEL_TIME="Tue Dec 17 23:36:49 UTC 2024"  
+         export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"  
+         export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)  
 
-         # 打印验证
-         echo "KERNEL_TIME = $KERNEL_TIME"
-         echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
+         # 打印验证  
+         echo "KERNEL_TIME = $KERNEL_TIME"  
+         echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"  
 
-         # 设置一些通用参数（便于后续维护）
-         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
-         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
-         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-         LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=-Wno-error \
-         SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
-         echo "Using SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
+         # 设置一些通用参数（便于后续维护）  
+         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \  
+         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \  
+         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \  
+         LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=-Wno-error \  
+         SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"  
+         echo "Using SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"  
 
-         # 进入源码目录
-         cd kernel_workspace/kernel_platform/common
+         # 进入源码目录  
+         cd kernel_workspace/kernel_platform/common  
 
-         # 执行 defconfig
-         make -j$(nproc) $MAKE_ARGS gki_defconfig
+         # 执行 defconfig  
+         make -j$(nproc) $MAKE_ARGS gki_defconfig  
 
-         # 编译全部目标
+         # 编译全部目标  
          make -j$(nproc) $MAKE_ARGS all
-
-         # 创建输出目录并复制 Image
-         mkdir -p ../dist
-         cp out/arch/arm64/boot/Image ../dist/
          
       # 6. 打印 ccache 使用统计
       - name: Show ccache stats
