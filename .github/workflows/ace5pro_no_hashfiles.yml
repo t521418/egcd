@@ -256,21 +256,30 @@ jobs:
          # 加入 ccache 到 PATH
          export PATH="/usr/lib/ccache:$PATH"
 
-         # 设置固定内核构建时间
+         # ✅ 加入 ccache 环境变量配置（命中率优化 + 日志分析）
+         export CC="ccache clang"
+         export CCACHE_DIR="/home/runner/.ccache"
+         export CCACHE_BASEDIR="${{ github.workspace }}"
+         export CCACHE_LOGFILE="${{ github.workspace }}/ccache.log"
+         export CCACHE_COMPILERCHECK="%compiler% -dumpmachine; %compiler% -dumpversion"
+         export CCACHE_NOHASHDIR=true
+         export CCACHE_HARDLINK=true
+
+         # 设置固定内核构建时间（可复现性）
          export KERNEL_TIME="Tue Dec 17 23:36:49 UTC 2024"
          export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"
          export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)
 
-         # 打印验证
          echo "KERNEL_TIME = $KERNEL_TIME"
          echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
 
-         # 设置一些通用参数（便于后续维护）
-         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
+         # ✅ 设置 MAKE_ARGS 时使用 $CC（ccache clang）而不是直接写 clang
+         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=\"$CC\" \
          RUSTC=${{ github.workspace }}/prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
          PAHOLE=${{ github.workspace }}/prebuilts/kernel-build-tools/linux-x86/bin/pahole \
          LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=-Wno-error \
          SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
+
          echo "Using SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
 
          # 进入源码目录
@@ -281,7 +290,6 @@ jobs:
 
          # 编译全部目标
          make -j$(nproc) $MAKE_ARGS all
-
          # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
