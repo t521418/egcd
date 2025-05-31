@@ -261,7 +261,7 @@ jobs:
          export CCACHE_BASEDIR="${{ github.workspace }}"
          export CCACHE_LOGFILE="${{ github.workspace }}/ccache.log"
          export CCACHE_COMPILERCHECK="%compiler% -dumpmachine; %compiler% -dumpversion"
-         export CCACHE_NOHASHDIR=false
+         export CCACHE_NOHASHDIR=true
          export CCACHE_HARDLINK=true
 
          # 设置固定内核构建时间（可复现性）
