@@ -1,4 +1,4 @@
-name: ace5pro加入kpm可选(主工作流)
+name: ace5pro加入kpm可选(测试)
 on:
   workflow_dispatch:
     inputs:
@@ -121,17 +121,6 @@ jobs:
          repo --trace sync -c -j$(nproc --all) --no-tags
          rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
          rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
-
-      # 5. 计算代码的哈希值并生成唯一缓存 key  
-      - name: Generate Cache Key  
-        id: cache_key
-        run: |
-         # 计算 .config 文件的 hash，确保每次源码变动都会影响缓存 key
-         cd kernel_workspace/kernel_platform/common
-         CONFIG_HASH=$(cat kernel_workspace/kernel_platform/common/.config | sha256sum | cut -d' ' -f1)
-         echo "CACHE_KEY=ccache-${{ runner.os }}-${{ github.repository }}-${{ github.ref_name }}-${CONFIG_HASH}" >> $GITHUB_ENV
-         echo "CACHE_KEY=${{ env.CACHE_KEY }}"
-         cd ../
          
       - name: Set up SukiSU
         run: |
