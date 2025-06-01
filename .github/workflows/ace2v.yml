@@ -47,6 +47,8 @@ jobs:
         run: |
          sudo apt-get update
          sudo apt-get install -y lld
+         sudo apt-get install -y gcc-aarch64-linux-gnu
+         aarch64-linux-gnu-gcc --version
 
       - name: 拉取源码
         run: |
@@ -154,12 +156,11 @@ jobs:
          # 5. 编译内核   
       - name: Build Kernel
         run: |
-         # 安装构建依赖：安装 lld (LLVM 链接器)
-         sudo apt-get update
-         sudo apt-get install -y lld
+         # 设置 CROSS_COMPILE 环境变量
+         export CROSS_COMPILE=aarch64-linux-gnu-
 
          # 设置一些通用参数（便于后续维护）
-         export MAKE_ARGS="ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- O=out KCFLAGS=-Wno-error"
+         export MAKE_ARGS="ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE O=out KCFLAGS=-Wno-error"
 
          # 进入源码目录
          cd kernel_workspace/kernel_platform/common
@@ -167,12 +168,12 @@ jobs:
          # 执行 defconfig
          make -j$(nproc) $MAKE_ARGS gki_defconfig
 
-         # 编译全部目标
-         make -j$(nproc) $MAKE_ARGS all
+         # 构建内核镜像
+         make -j$(nproc) $MAKE_ARGS Image
 
          # 创建输出目录并复制 Image
          mkdir -p ../dist
-         cp out/arch/arm64/boot/Image ../dist/
+         cp out/arch/arm64/boot/Image ../dist
 
       - name: 验证内核构建时间
         run: |
