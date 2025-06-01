@@ -264,12 +264,11 @@ jobs:
          echo "KERNEL_TIME = $KERNEL_TIME"
          echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
 
-         # 设置一些通用参数（便于后续维护）
-         export KCFLAGS='-Wno-error -O3'
+         # 设置基础构建参数
          export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
          RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
          PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-         LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=\"$KCFLAGS\" SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
+         LD=ld.lld HOSTLD=ld.lld O=out SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
          echo "Using SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
 
          # 进入源码目录
@@ -278,10 +277,8 @@ jobs:
          # 执行 defconfig
          make -j$(nproc) $MAKE_ARGS gki_defconfig
 
-         # 编译全部目标
-         make -j$(nproc --all) $MAKE_ARGS all
-         echo "Verifying optimization level in compile command:"
-         grep -- '-O' out/.config || echo "May need to check compiler flags manually."
+         # 编译内核（使用 -O3 优化，关闭 warning->error）
+         KBUILD_CFLAGS='-O3' KCFLAGS='-Wno-error' make -j$(nproc) $MAKE_ARGS all
          # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
