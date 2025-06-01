@@ -268,7 +268,11 @@ jobs:
          export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
          RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
          PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-         LD=ld.lld HOSTLD=ld.lld O=out SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
+         LD=ld.lld HOSTLD=ld.lld O=out SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH} \
+         KBUILD_CFLAGS='-O3 -pipe -fomit-frame-pointer -funroll-loops -fmerge-all-constants -fno-semantic-interposition -fno-strict-aliasing -fno-ipa-cp -falign-functions=32 -falign-jumps=32 -falign-loops=32 -mbranch-protection=standard' \
+         KBUILD_CFLAGS_KERNEL='-O3' \
+         KBUILD_CFLAGS_MODULE='-O3' \
+         KCFLAGS='-Wno-error'"
          echo "Using SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
 
          # 进入源码目录
@@ -278,9 +282,9 @@ jobs:
          make -j$(nproc) $MAKE_ARGS gki_defconfig
 
          # 编译内核（使用 -O3 优化，关闭 warning->error）
-         KBUILD_CFLAGS='-O3' KCFLAGS='-Wno-error' make -j$(nproc) $MAKE_ARGS all
-         echo "Checking compiled optimization level:"
-         find out/ -name '*.cmd' | xargs grep -- '-O' | grep -v 'O2' | head
+         make -j$(nproc) $MAKE_ARGS KCFLAGS="-O3 -Wno-error" all
+         echo "扫描所有 -O 编译选项出现情况："
+         find out/ -name '*.cmd' | xargs grep -- '-O' | cut -d' ' -f1 | sort | uniq -c
          # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
