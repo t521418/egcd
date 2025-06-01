@@ -43,11 +43,16 @@ jobs:
          git config --global user.name "build"
          git config --global user.email "2106456897@qq.com"
 
+      - name: Install build dependencies
+        run: |
+         sudo apt-get update
+         sudo apt-get install -y lld
+
       - name: 拉取源码
         run: |
           mkdir -p kernel_workspace/kernel_platform
           cd kernel_workspace/kernel_platform
-          git clone https://github.com/OnePlusOSS/android_kernel_5.10_oneplus_mt6983.git common --depth=1
+          git clone -b oneplus/mt6983_v_15.0.0_ace_2v https://github.com/OnePlusOSS/android_kernel_5.10_oneplus_mt6983.git common --depth=1
           ls -l | grep '^d'
       
       - name: Set up SukiSU
@@ -146,27 +151,11 @@ jobs:
          sed -i '186s|echo ".*"|echo "${KERNELVERSION}${scm_version}${config_localversion}"|' common/scripts/setlocalversion
          sed -i "s/\${scm_version}/${{ github.event.inputs.KERNEL_NAME }}/g" ./common/scripts/setlocalversion
          
-      - name: 设置 CONFIG_LOCALVERSION
-        run: |
-         cd kernel_workspace/kernel_platform
-         echo 'CONFIG_LOCALVERSION="${{ github.event.inputs.local_version }}"' >> ./common/arch/arm64/configs/gki_defconfig    
-                   
-      - name: Set build timestamp
-        run: |         
-         export SOURCE_DATE_EPOCH=$(date -d "Tue Dec 17 23:36:49 UTC 2024" +%s)
-         echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
-         
-      # 5. 编译内核   
+         # 5. 编译内核   
       - name: Build Kernel
         run: |
          # 加入 clang 到 PATH
          export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-         # 加入 ccache 到 PATH
-         export PATH="/usr/lib/ccache:$PATH" 
-
-         # 打印验证
-         echo "KERNEL_TIME = $KERNEL_TIME"
-         echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
 
          # 设置一些通用参数（便于后续维护）
          export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
@@ -181,9 +170,10 @@ jobs:
 
          # 执行 defconfig
          make -j$(nproc) $MAKE_ARGS gki_defconfig
-
+         
          # 编译全部目标
-         make -j$(nproc --all) $MAKE_ARGS all
+         make -j$(nproc) $MAKE_ARGS all
+
          # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
