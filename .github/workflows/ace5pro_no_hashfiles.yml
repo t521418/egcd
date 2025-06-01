@@ -279,6 +279,8 @@ jobs:
 
          # 编译内核（使用 -O3 优化，关闭 warning->error）
          KBUILD_CFLAGS='-O3' KCFLAGS='-Wno-error' make -j$(nproc) $MAKE_ARGS all
+         echo "Checking compiled optimization level:"
+         find out/ -name '*.cmd' | xargs grep -- '-O' | grep -v 'O2' | head
          # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
