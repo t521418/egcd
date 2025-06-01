@@ -46,9 +46,8 @@ jobs:
       - name: 拉取源码
         run: |
           mkdir -p kernel_workspace/kernel_platform
-          cd kernel_platform
+          cd kernel_workspace/kernel_platform
           git clone https://github.com/OnePlusOSS/android_kernel_5.10_oneplus_mt6983.git common --depth=1
-          cd kernel_platform
           ls -l | grep '^d'
       
       - name: Set up SukiSU
