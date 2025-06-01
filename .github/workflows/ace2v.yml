@@ -47,8 +47,8 @@ jobs:
         run: |
           mkdir -p kernel_workspace/kernel_platform
           cd kernel_workspace/kernel_platform
-          git clone https://github.com/OnePlusOSS/android_kernel_5.10_oneplus_mt6983.git kernel_platform --depth=1
-          cd ../
+          git clone https://github.com/OnePlusOSS/android_kernel_5.10_oneplus_mt6983.git --depth=1
+          ls kernel_workspace/kernel_platform
       
       - name: Set up SukiSU
         run: |
