@@ -252,37 +252,30 @@ jobs:
         run: |
          # 加入 clang 到 PATH
          export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-         export PATH="/usr/lib/ccache:$PATH"
-
-         # 固定时间戳
+         # 加入 ccache 到 PATH
+         export PATH="/usr/lib/ccache:$PATH" 
+         # 设置固定内核构建时间
          export KERNEL_TIME="Tue Dec 17 23:36:49 UTC 2024"
          export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"
          export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)
+         # 打印验证
          echo "KERNEL_TIME = $KERNEL_TIME"
          echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
-
-         # 设置基础构建参数（不含编译优化）
+         # 设置基础构建参数
          export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
          RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
          PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
          LD=ld.lld HOSTLD=ld.lld O=out SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
-
+         echo "Using SOURCE_DATE_EPOCH: $SOURCE_DATE_EPOCH"
+         # 进入源码目录
          cd kernel_workspace/kernel_platform/common
-
-         # defconfig
+         # 执行 defconfig
          make -j$(nproc) $MAKE_ARGS gki_defconfig
-
-         # 编译（这里单独添加 KCFLAGS/KBUILD_CFLAGS）
-         KCFLAGS='-O3 -Wno-error' \
-         KBUILD_CFLAGS='-O3' \
-         KBUILD_CFLAGS_KERNEL='-O3' \
-         KBUILD_CFLAGS_MODULE='-O3' \
-         make -j$(nproc) $MAKE_ARGS all
-
-         # 检查是否成功启用 -O3
+         # 编译内核（使用 -O3 优化，关闭 warning->error）
+         KBUILD_CFLAGS='-O3' KCFLAGS='-Wno-error' make -j$(nproc) $MAKE_ARGS all
          echo "Checking compiled optimization level:"
-         find out/ -name '*.cmd' | xargs grep -- '-O' | grep '\-O3' | head
-
+         find out/ -name '*.cmd' | xargs grep -- '-O' | grep -v 'O2' | head
+         # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
          
