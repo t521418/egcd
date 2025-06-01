@@ -279,7 +279,7 @@ jobs:
          make -j$(nproc) $MAKE_ARGS gki_defconfig
 
          # 编译全部目标
-         make -j$(nproc) $MAKE_ARGS all
+         make -j$(nproc --all) $MAKE_ARGS all
          echo "Verifying optimization level in compile command:"
          grep -- '-O' out/.config || echo "May need to check compiler flags manually."
          # 创建输出目录并复制 Image
