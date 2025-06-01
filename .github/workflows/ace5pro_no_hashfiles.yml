@@ -179,6 +179,9 @@ jobs:
           # Add VFS configuration settings
           echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
+          # 启用 ThinLTO 支持
+          echo "CONFIG_LTO_CLANG=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_LTO_CLANG_THIN=y" >> ./common/arch/arm64/configs/gki_defconfig
           
           # Add SUSFS configuration settings
           echo "CONFIG_KSU_SUSFS=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -275,6 +278,8 @@ jobs:
          KBUILD_CFLAGS='-O3' KCFLAGS='-Wno-error' make -j$(nproc) $MAKE_ARGS all
          echo "Checking compiled optimization level:"
          find out/ -name '*.cmd' | xargs grep -- '-O' | grep -v 'O2' | head
+         echo "Checking if ThinLTO was applied:"
+         find out/ -name '*.cmd' | xargs grep -E '\-flto(=thin)?' | head
          # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
