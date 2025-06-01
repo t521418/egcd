@@ -48,7 +48,7 @@ jobs:
           mkdir -p kernel_workspace/kernel_platform
           cd kernel_workspace/kernel_platform
           git clone https://github.com/OnePlusOSS/android_kernel_5.10_oneplus_mt6983.git --depth=1
-          ls kernel_workspace/kernel_platform
+          ls -l | grep '^d'
       
       - name: Set up SukiSU
         run: |
@@ -165,11 +165,6 @@ jobs:
          export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
          # 加入 ccache 到 PATH
          export PATH="/usr/lib/ccache:$PATH" 
-
-         # 设置固定内核构建时间
-         export KERNEL_TIME="Tue Dec 17 23:36:49 UTC 2024"
-         export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"
-         export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)
 
          # 打印验证
          echo "KERNEL_TIME = $KERNEL_TIME"
