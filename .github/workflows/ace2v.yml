@@ -154,14 +154,12 @@ jobs:
          # 5. 编译内核   
       - name: Build Kernel
         run: |
-         # 加入 clang 到 PATH
-         export PATH="/home/runner/work/egcd/egcd/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
+         # 安装构建依赖：安装 lld (LLVM 链接器)
+         sudo apt-get update
+         sudo apt-get install -y lld
 
          # 设置一些通用参数（便于后续维护）
-         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
-         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
-         PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-         LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS=-Wno-error"
+         export MAKE_ARGS="ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- O=out KCFLAGS=-Wno-error"
 
          # 进入源码目录
          cd kernel_workspace/kernel_platform/common
