@@ -45,9 +45,9 @@ jobs:
 
       - name: 拉取源码
         run: |
-          mkdir -p kernel_workspace
-          cd kernel_workspace
-          git clone https://github.com/OnePlusOSS/android_kernel_5.10_oneplus_mt6983.git kernel_platform --depth=1
+          mkdir -p kernel_workspace/kernel_platform
+          cd kernel_platform
+          git clone https://github.com/OnePlusOSS/android_kernel_5.10_oneplus_mt6983.git common --depth=1
           cd kernel_platform
           ls -l | grep '^d'
       
@@ -69,9 +69,6 @@ jobs:
          git clone --depth=1 https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}
          git clone --depth=1 https://github.com/SukiSU-Ultra/SukiSU_patch.git
          cd kernel_platform
-
-         # 确保目标目录存在
-         mkdir -p ./common/fs ./common/include/linux ./common/lib ./common/crypto
 
          # 复制文件到目标目录
          cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch ./common/ || true
