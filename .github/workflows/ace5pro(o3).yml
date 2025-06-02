@@ -1,4 +1,4 @@
-name: ace5pro加入kpm可选(测试)
+name: ace5pro加入kpm可选(o3)
 on:
   workflow_dispatch:
     inputs:
@@ -85,7 +85,7 @@ jobs:
         uses: actions/cache@v3
         with:
          path: /home/runner/.ccache
-         key: ${{ runner.os }}-${{ github.repository }}-v1
+         key: ${{ runner.os }}-${{ github.repository }}-v2
          restore-keys: |
           ${{ runner.os }}-${{ github.repository }}-
           ${{ runner.os }}-
