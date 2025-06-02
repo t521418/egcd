@@ -70,30 +70,38 @@ jobs:
          git config --global user.name "build"
          git config --global user.email "2106456897@qq.com"
 
-      # 1. 安装构建依赖（包括 ccache）
-      - name: Install Dependencies
-        run: |
-         sudo apt-get update
-         sudo apt-get install -y python3 git curl ccache libelf-dev
+      # 1. 拉取仓库  
+      - name: Checkout  
+        uses: actions/checkout@v4  
 
-      # 2. 恢复 ccache 缓存（按分支区分）
+      # 2. 安装构建依赖（包括 ccache）  
+      - name: Install Dependencies  
+        run: |  
+         sudo apt-get update  
+         sudo apt-get install -y python3 git curl ccache libelf-dev  
+
+      # 3. 恢复 ccache 缓存  
       - name: Restore ccache
         uses: actions/cache@v3
         with:
          path: /home/runner/.ccache
-         key: ccache-${{ runner.os }}-${{ github.ref }}
+         key: ${{ runner.os }}-${{ github.repository }}-v1
          restore-keys: |
-          ccache-${{ runner.os }}-
+          ${{ runner.os }}-${{ github.repository }}-
+          ${{ runner.os }}-
+          ccache-
 
-      # 3. 设置 ccache 环境变量
-      - name: Setup ccache environment
-        run: |
-         echo "CCACHE_DIR=/home/runner/.ccache" >> $GITHUB_ENV
-         echo "CCACHE_MAXSIZE=8G" >> $GITHUB_ENV
-         echo "CCACHE_COMPILERCHECK=%compiler% -dumpmachine; %compiler% -dumpversion" >> $GITHUB_ENV
-         echo "CCACHE_NOHASHDIR=true" >> $GITHUB_ENV
-         echo "CCACHE_HARDLINK=true" >> $GITHUB_ENV
-         echo "/usr/lib/ccache" >> $GITHUB_PATH  # 将 /usr/lib/ccache 添加到 PAT
+      # 4. 设置 ccache 环境变量  
+      - name: Setup ccache environment  
+        run: |  
+         echo "CCACHE_DIR=/home/runner/.ccache" >> $GITHUB_ENV  
+         echo "CCACHE_MAXSIZE=8G" >> $GITHUB_ENV  
+         echo "CCACHE_COMPILERCHECK=%compiler% -dumpmachine; %compiler% -dumpversion" >> $GITHUB_ENV  
+         echo "CCACHE_NOHASHDIR=true" >> $GITHUB_ENV  
+         echo "CCACHE_HARDLINK=true" >> $GITHUB_ENV  
+         echo "CCACHE_BASEDIR=${{ github.workspace }}" >> $GITHUB_ENV  
+         echo "CCACHE_LOGFILE=${{ github.workspace }}/ccache.log" >> $GITHUB_ENV  
+         echo "/usr/lib/ccache" >> $GITHUB_PATH  
          
       - name: Show ccache stats
         run: |
