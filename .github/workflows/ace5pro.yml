@@ -247,34 +247,10 @@ jobs:
     
       - name: 拉取并集成 sched_ext 调度器
         run: |
-         set -e
-         sched_dir="kernel_workspace/kernel_platform/common/kernel/sched"
-         build_file="$sched_dir/build_policy.c"
-         echo "🔍 检查 sched_ext 核心文件是否存在..."
-         if [ -f "$sched_dir/slim_sysctl.c" ] && [ -f "$sched_dir/hmbird_sched_proc_main.c" ]; then
-          echo "✅ sched_ext 已存在，跳过拉取。"
-         else
-          echo "⬇️ 拉取 sched_ext 源码..."
-         tmp_dir=$(mktemp -d)
-
-         if ! git clone --depth=1 https://github.com/egcd123/sched_ext.git "$tmp_dir"; then
-          echo "❌ 克隆 sched_ext 仓库失败"
-          rm -rf "$tmp_dir"
-          exit 1
-          fi
-          echo "📂 拷贝 sched_ext 源码到 $sched_dir..."
-          find "$tmp_dir" -type f -name "*.c" -o -name "*.h" -exec cp -v --backup=numbered {} "$sched_dir" \;
-          rm -rf "$tmp_dir"
-          fi
-          echo "🛠 修改 build_policy.c 以包含调度器源码..."
-          if ! grep -q 'hmbird_sched_proc_main.c' "$build_file"; then
-          sed -i.bak '/# include "ext.c"/a\
-          # include "hmbird_sched_proc_main.c"\
-          \n#endif\n\n#ifdef CONFIG_SLIM_SCHED\n# include "slim_sysctl.c"' "$build_file"
-           echo "✅ 成功注入 include。"
-           else
-           echo "✅ build_policy.c 已包含相应内容，无需重复修改。"
-           fi
+         cd kernel_workspace/kernel_platform/
+         git clone https://github.com/egcd123/sched_ext.git
+         cp -r ./sched_ext/* ./common/kernel/sched
+         rm -rf ./sched_ext/.git
             
       - name: Set build timestamp
         run: |         
