@@ -146,6 +146,7 @@ jobs:
          cp -r ../SukiSU_patch/other/zram/lz4k_oplus ./common/lib/ || true
          cp ../111/boot.patch ./common/
          cp ../kernel_patches/next/0001-kernel-implement-susfs-v1.5.8-KernelSU-Next-v1.0.8.patch ./common/
+         cp ../kernel_patches/69_hide_stuff.patch ./common/
          cd ./common
          PATCH_FILE=50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch
          if [[ -f "$PATCH_FILE" ]]; then
@@ -157,6 +158,7 @@ jobs:
          patch -p1 -F 3 < syscall_hooks.patch || true
          patch -s -p1 -F 3 < boot.patch
          patch -p1 < 0001-kernel-implement-susfs-v1.5.8-KernelSU-Next-v1.0.8.patch || true
+         patch -p1 -F 3 < 69_hide_stuff.patch
          echo "✅ SUSFS 和 syscall_hooks patch 应用完成"
 
       - name: Apply lz4kd Patches
