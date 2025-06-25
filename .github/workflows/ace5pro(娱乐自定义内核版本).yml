@@ -125,11 +125,12 @@ jobs:
          cd kernel_workspace/kernel_platform
          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
          cd KernelSU
+         # 替换 get_ksu_kernel_version 块为自定义格式
          sed -i "/^define get_ksu_kernel_version$/,/^endef$/c\
          define get_ksu_kernel_version\\
-         v\\\$(KSU_API_VERSION)@$TAG_SUFFIX\\
+         v\$(KSU_API_VERSION_LOCAL)-sukisu-\$(KSU_API_VERSION)-by-${TAG_SUFFIX}\\
          endef" kernel/Makefile
-         echo "✅ Injected get_ksu_kernel_version as v\$(KSU_API_VERSION)@$TAG_SUFFIX"
+         echo "✅ Injected SukiSU kernel version: v\$(KSU_API_VERSION_LOCAL)-sukisu-\$(KSU_API_VERSION)-by-${TAG_SUFFIX}"
 
       - name: Set up SUSFS & apply patches
         run: |
@@ -321,5 +322,5 @@ jobs:
       - name: Upload AnyKernel3 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AnyKernel3_oneplus_ace5pro_${{ env.KSUVER }}_sukisu_自定义
+          name: AnyKernel3_oneplus_ace5pro_${{ KSU_API_VERSION }}_sukisu_自定义
           path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
