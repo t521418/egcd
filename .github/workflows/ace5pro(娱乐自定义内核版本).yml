@@ -31,11 +31,11 @@ on:
         required: false
         default: false
         type: boolean
-      local_version:
-        description: '是否修改内核后缀名？ (默认"-4k")'
+      remove_default_4k:
+        description: '是否删除默认的 -4k 后缀？（勾选则删除）'
         required: false
-        default: '-4k'
-        type: string
+        default: false
+        type: boolean
       sukisu_version:
         description: "自定义sukisu版本号"
         required: true
