@@ -39,7 +39,7 @@ on:
       sukisu_tag:
         description: "自定义版本来源后缀（如 jianqing）"
         required: false
-        default: "jianqing"
+        default: "见清"
         
 jobs:
   build:
