@@ -309,7 +309,7 @@ jobs:
          make -j$(nproc) $MAKE_ARGS gki_defconfig
 
          # 编译全部目标
-         make -j$(nproc) $MAKE_ARGS all 2>&1 | tee build.log
+         make -j$(nproc) $MAKE_ARGS all
 
          # 创建输出目录并复制 Image
          mkdir -p ../dist
