@@ -31,6 +31,11 @@ on:
         required: false
         default: false
         type: boolean
+      local_version:
+        description: '输入内核后缀名（如-v8）'
+        required: false
+        default: '-4k'
+        type: string
       remove_default_4k:
         description: '是否删除默认的 -4k 后缀？（勾选则删除）'
         required: false
