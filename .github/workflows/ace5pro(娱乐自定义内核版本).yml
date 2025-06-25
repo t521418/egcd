@@ -37,7 +37,7 @@ on:
         default: false
         type: boolean
       sukisu_tag:
-        description: "自定义版本来源后缀（如 jianqing）"
+        description: "自定义版本来源后缀（如:见清）"
         required: false
         default: "见清"
         
@@ -119,6 +119,7 @@ jobs:
       - name: Export suffix
         run: |
           echo "TAG_SUFFIX=${{ github.event.inputs.sukisu_tag }}" >> $GITHUB_ENV
+          echo "KSU_API_VERSION=$KSU_API_VERSION" >> $GITHUB_ENV
          
       - name: Inject dynamic SukiSU string version
         run: |
@@ -322,5 +323,5 @@ jobs:
       - name: Upload AnyKernel3 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AnyKernel3_oneplus_ace5pro_${{ KSU_API_VERSION }}_sukisu_自定义
+          name: AnyKernel3_oneplus_ace5pro_${{ env.KSU_API_VERSION }}_sukisu_自定义
           path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
