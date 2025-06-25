@@ -184,6 +184,8 @@ jobs:
           # Add VFS configuration settings
           echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_LTO_CLANG=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_LTO_CLANG_THIN=y" >> ./common/arch/arm64/configs/gki_defconfig
           
           # Add SUSFS configuration settings
           echo "CONFIG_KSU_SUSFS=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -220,16 +222,6 @@ jobs:
          sudo sed -i 's/check_defconfig//' ./common/build.config.gki
          cd common
          git add -A && git commit -a -m "BUILD Kernel"
-         
-      - name: 启用LTO
-        if: ${{ fromJSON(github.event.inputs.ENABLE_LTO) }}
-        run: |
-         cd kernel_workspace/kernel_platform
-         echo "CONFIG_LTO_CLANG=y" >> ./common/arch/arm64/configs/gki_defconfig
-         echo "CONFIG_LTO_CLANG_THIN=y" >> ./common/arch/arm64/configs/gki_defconfig
-         sudo sed -i 's/check_defconfig//' ./common/build.config.gki
-         cd common
-         git add -A && git commit -a -m "BUILD Kernel with LTO enabled"
 
       - name: Add make name
         run: |
