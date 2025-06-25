@@ -115,17 +115,19 @@ jobs:
          repo --trace sync -c -j$(nproc --all) --no-tags
          rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
          rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
+
+      - name: Export suffix
+        run: |
+          echo "TAG_SUFFIX=${{ github.event.inputs.sukisu_tag }}" >> $GITHUB_ENV
          
       - name: Inject dynamic SukiSU string version
         run: |
          cd kernel_workspace/kernel_platform
          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
          cd KernelSU
-         # 获取自定义后缀，例如 'jianqing'
-         TAG_SUFFIX="${{ github.event.inputs.sukisu_version }}"
-         sed -i "/^define get_ksu_kernel_version\$/,/^endef\$/c\
+         sed -i "/^define get_ksu_kernel_version$/,/^endef$/c\
          define get_ksu_kernel_version\\
-         v\\\$(KSU_API_VERSION)@${TAG_SUFFIX}\\
+         v\\\$(KSU_API_VERSION)@$TAG_SUFFIX\\
          endef" kernel/Makefile
          echo "✅ Injected get_ksu_kernel_version as v\$(KSU_API_VERSION)@$TAG_SUFFIX"
 
