@@ -36,10 +36,10 @@ on:
         required: false
         default: false
         type: boolean
-      sukisu_version:
-        description: "自定义sukisu版本号"
-        required: true
-        default: "13171"
+      sukisu_tag:
+        description: "自定义版本来源后缀（如 jianqing）"
+        required: false
+        default: "jianqing"
         
 jobs:
   build:
@@ -116,20 +116,21 @@ jobs:
          rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
          rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
          
-      - name: Set up and inject custom SukiSU version
+      - name: Inject dynamic SukiSU string version
         run: |
          cd kernel_workspace/kernel_platform
          curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
          cd KernelSU
-         # 获取用户输入的版本号
-         KSU_VERSION="${{ github.event.inputs.sukisu_version }}"
-         echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
-         # 拼接成新版格式 v13171@jianqing 并替换到 Makefile 中
-         sed -i "/^define get_ksu_kernel_version\$/,/^endef\$/c\\
+
+         # 获取自定义后缀，例如 'jianqing'
+         TAG_SUFFIX="${{ github.event.inputs.sukisu_version }}"
+
+         # 替换 get_ksu_kernel_version 定义为：v$(KSU_API_VERSION)@后缀
+         sed -i '/^define get_ksu_kernel_version$/,/^endef$/c\
          define get_ksu_kernel_version\\
-         v$KSU_VERSION@jianqing\\
-         endef" kernel/Makefile
-         echo "✅ Injected SukiSU version: v$KSU_VERSION@jianqing"
+         v$(KSU_API_VERSION)@'"$TAG_SUFFIX"'\\
+         endef' kernel/Makefile
+         echo "✅ Injected get_ksu_kernel_version as v\$(KSU_API_VERSION)@$TAG_SUFFIX"
 
       - name: Set up SUSFS & apply patches
         run: |
