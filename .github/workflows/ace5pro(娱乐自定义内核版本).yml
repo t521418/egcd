@@ -124,7 +124,6 @@ jobs:
       - name: Export suffix
         run: |
           echo "TAG_SUFFIX=${{ github.event.inputs.sukisu_tag }}" >> $GITHUB_ENV
-          echo "KSU_API_VERSION=$KSU_API_VERSION" >> $GITHUB_ENV
          
       - name: Inject dynamic SukiSU string version
         run: |
@@ -137,6 +136,11 @@ jobs:
          v\$(KSU_API_VERSION_LOCAL)-sukisu-\$(KSU_API_VERSION)-by-${TAG_SUFFIX}\\
          endef" kernel/Makefile
          echo "✅ Injected SukiSU kernel version: v\$(KSU_API_VERSION_LOCAL)-sukisu-\$(KSU_API_VERSION)-by-${TAG_SUFFIX}"
+         # 从 Makefile 中提取已计算的 KSU_API_VERSION
+         KSU_API_VERSION=$(grep 'KSU_API_VERSION :=' kernel/Makefile | awk '{print $3}')
+         # 写入 GitHub Actions 的环境变量
+         echo "KSU_API_VERSION=$KSU_API_VERSION" >> $GITHUB_ENV
+         echo "✅ Exported KSU_API_VERSION=$KSU_API_VERSION to GITHUB_ENV"
 
       - name: Set up SUSFS & apply patches
         run: |
