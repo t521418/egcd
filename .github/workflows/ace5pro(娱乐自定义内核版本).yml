@@ -136,11 +136,6 @@ jobs:
          v\$(KSU_API_VERSION_LOCAL)-sukisu-\$(KSU_API_VERSION)-by-${TAG_SUFFIX}\\
          endef" kernel/Makefile
          echo "✅ Injected SukiSU kernel version: v\$(KSU_API_VERSION_LOCAL)-sukisu-\$(KSU_API_VERSION)-by-${TAG_SUFFIX}"
-         # 从 Makefile 中提取已计算的 KSU_API_VERSION
-         KSU_API_VERSION=$(grep 'KSU_API_VERSION :=' kernel/Makefile | awk '{print $3}')
-         # 写入 GitHub Actions 的环境变量
-         echo "KSU_API_VERSION=$KSU_API_VERSION" >> $GITHUB_ENV
-         echo "✅ Exported KSU_API_VERSION=$KSU_API_VERSION to GITHUB_ENV"
 
       - name: Set up SUSFS & apply patches
         run: |
@@ -311,15 +306,17 @@ jobs:
          make -j$(nproc) $MAKE_ARGS gki_defconfig
 
          # 编译全部目标
-         make -j$(nproc) $MAKE_ARGS all
+         make -j$(nproc) $MAKE_ARGS all 2>&1 | tee build.log
 
          # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
 
-      - name: 验证内核构建时间
+      - name: 验证内核构建时间并写入sukisu的版本变量
         run: |
          strings kernel_workspace/kernel_platform/common/out/vmlinux | grep "UTC"
+         KSU_API_VERSION=$(grep 'version (GitHub):' build.log | grep -o '[0-9]\{5,\}' | head -n1)
+         echo "KSU_API_VERSION=$KSU_API_VERSION" >> $GITHUB_ENV
 
       - name: Prepare AnyKernel3 package
         run: |
