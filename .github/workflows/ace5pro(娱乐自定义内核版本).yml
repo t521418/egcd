@@ -130,8 +130,6 @@ jobs:
          cd kernel_workspace/kernel_platform
          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
          cd KernelSU
-         # 获取当前标签版本（如 v3.1.6）
-         KSU_API_VERSION_LOCAL=$(git describe --tags --abbrev=0)
          # 获取自定义后缀（如：见清）
          TAG_SUFFIX="${{ github.event.inputs.sukisu_tag }}"
          sed -i "/^define get_ksu_version_full$/,/^endef$/c\
