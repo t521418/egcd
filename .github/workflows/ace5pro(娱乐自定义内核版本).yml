@@ -273,45 +273,46 @@ jobs:
 
       - name: Build Kernel
         run: |
-         # 设置 PATH
+         # 加入 clang 到 PATH
          export PATH="${{ github.workspace }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-         export PATH="/usr/lib/ccache:$PATH"
+         # 加入 ccache 到 PATH
+         export PATH="/usr/lib/ccache:$PATH" 
 
-         # 设置时间戳
+         # 设置固定内核构建时间
          export KERNEL_TIME="Tue Dec 17 23:36:49 UTC 2024"
          export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"
          export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)
-
-         # 设置 AutoFDO 配置文件路径
+         # 设置 AFDO 配置文件路径
          export AFDO_PROFILE="${{ github.workspace }}/kernel_workspace/kernel_platform/afdo/kernel.afdo"
          if [ ! -f "$AFDO_PROFILE" ]; then
-         echo "Error: AFDO profile not found at $AFDO_PROFILE"
+           echo "Error: AFDO profile not found at $AFDO_PROFILE"
          exit 1
          fi
 
-         # 设置 KCFLAGS（单独传）
-         export KCFLAGS="-O3 -Wno-error -fauto-profile=$AFDO_PROFILE"
+         # 打印验证
+         echo "KERNEL_TIME = $KERNEL_TIME"
+         echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
+         echo "Using KCFLAGS: -Wno-error -fauto-profile=$AFDO_PROFILE"
 
-         # 设置其他编译参数（不包含 KCFLAGS）
-         export MAKE_ARGS="LLVM=1 KBUILD_LTO=thin ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-         CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
+         # 设置一些通用参数（便于后续维护）
+         export KCFLAGS="-Wno-error -fauto-profile=$AFDO_PROFILE"
+         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
+         RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
          PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
          LD=ld.lld HOSTLD=ld.lld O=out SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
 
-         # 打印调试信息
-         echo "KERNEL_TIME = $KERNEL_TIME"
-         echo "SOURCE_DATE_EPOCH = $SOURCE_DATE_EPOCH"
-         echo "Using KCFLAGS: $KCFLAGS"
-
-         # 编译
+         # 进入源码目录
          cd kernel_workspace/kernel_platform/common
-         make -j$(nproc) KCFLAGS="$KCFLAGS" $MAKE_ARGS gki_defconfig
-         make -j$(nproc) KCFLAGS="$KCFLAGS" $MAKE_ARGS all
 
-         # 拷贝输出文件
+         # 执行 defconfig
+         make -j$(nproc) $MAKE_ARGS gki_defconfig
+
+         # 编译全部目标
+         make -j$(nproc) $MAKE_ARGS all
+
+         # 创建输出目录并复制 Image
          mkdir -p ../dist
          cp out/arch/arm64/boot/Image ../dist/
-
 
       - name: Prepare AnyKernel3 package
         run: |
