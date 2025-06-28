@@ -299,8 +299,7 @@ jobs:
          export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
          RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
          PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-         LD=ld.lld HOSTLD=ld.lld O=out KCFLAGS='-O2 -Wno-error -pipe -fno-strict-aliasing -fno-stack-protector -Wno-unused-function' 
-         SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
+         LD=ld.lld HOSTLD=ld.lld O=out SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
 
          # 进入源码目录
          cd kernel_workspace/kernel_platform/common
