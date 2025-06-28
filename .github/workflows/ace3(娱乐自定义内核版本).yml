@@ -259,12 +259,6 @@ jobs:
          export KERNEL_TIME="Mon Apr 14 14:55:21 UTC 2025"
          export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"
          export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)
-         # 设置 AFDO 配置文件路径
-         export AFDO_PROFILE="${{ github.workspace }}/kernel_workspace/kernel_platform/afdo/kernel.afdo"
-         if [ ! -f "$AFDO_PROFILE" ]; then
-           echo "Error: AFDO profile not found at $AFDO_PROFILE"
-         exit 1
-         fi
 
          # 打印验证
          echo "KERNEL_TIME = $KERNEL_TIME"
