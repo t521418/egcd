@@ -295,7 +295,6 @@ jobs:
          export KERNEL_TIME="Tue Dec 17 23:36:49 UTC 2024"
          export KBUILD_BUILD_TIMESTAMP="$KERNEL_TIME"
          export SOURCE_DATE_EPOCH=$(date -d "$KERNEL_TIME" +%s)
-         export BUILD_VERSION=1
          # 设置 AFDO 配置文件路径
          export AFDO_PROFILE="${{ github.workspace }}/kernel_workspace/kernel_platform/afdo/kernel.afdo"
          if [ ! -f "$AFDO_PROFILE" ]; then
@@ -310,7 +309,7 @@ jobs:
 
          # 设置一些通用参数（便于后续维护）
          export KCFLAGS="-Wno-error -fauto-profile=$AFDO_PROFILE"
-         export MAKE_ARGS="LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
+         export MAKE_ARGS="BUILD_VERSION=1 LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang \
          RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
          PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole \
          LD=ld.lld HOSTLD=ld.lld O=out SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}"
