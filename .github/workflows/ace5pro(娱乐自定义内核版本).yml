@@ -219,8 +219,6 @@ jobs:
           CONFIG_LTO_CLANG=y
           CONFIG_LTO_CLANG_THIN=y
           CONFIG_LTO_POLLY=y
-          # 构建时间加上1
-          CONFIG_LOCALVERSION_AUTO＝y
           # 启用压缩算法支持
           CONFIG_CRYPTO_LZ4HC=y
           CONFIG_CRYPTO_LZ4K=y
@@ -235,8 +233,6 @@ jobs:
           CONFIG_TCP_CONG_WESTWOOD=n
           CONFIG_TCP_CONG_HTCP=n
           CONFIG_DEFAULT_TCP_CONG=bbr
-          # 稳定版本名
-          CONFIG_LOCALVERSION_AUTO=n
           EOF
           # 移除构建流程中的 check_defconfig 校验
           sed -i 's/check_defconfig//' ./common/build.config.gki
