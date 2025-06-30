@@ -78,8 +78,8 @@ jobs:
       - name: Install Dependencies  
         run: |  
          sudo apt-get update  
-         sudo apt-get install -y python3 git curl ccache libelf-dev  
-
+         sudo apt-get install -y python3 git curl ccache libelf-dev
+         
       # 3. 恢复 ccache 缓存  
       - name: Restore ccache
         uses: actions/cache@v3
@@ -294,9 +294,13 @@ jobs:
          cd kernel_workspace/kernel_platform/common
          make -j$(nproc) $MAKE_ARGS gki_defconfig
          make -j$(nproc) $MAKE_ARGS all
+         make -C tools/perf ARCH=arm64 LLVM=1 CC=clang \
+         NO_LIBTRACEEVENT=1 NO_LIBUNWIND=1 NO_LIBDW_DWARF_UNWIND=1 \
+         NO_LIBELF=1 NO_PERL=1 NO_SLANG=1
          # 修复这里
          cp out/arch/arm64/boot/Image ../dist/
          cp out/vmlinux ../dist/
+         cp tools/perf/perf ../dist/perf/
          cp -r ../../AnyKernel3/* ../dist/AnyKernel3/
 
       - name: 打kpm补丁
@@ -332,4 +336,11 @@ jobs:
         with:
           name: vmlinux
           path: kernel_workspace/kernel_platform/dist/vmlinux
+
+      - name: Upload perf binary
+        uses: actions/upload-artifact@v4
+        with:
+         name: perf-tool
+         path: kernel_workspace/kernel_platform/dist/perf/perf
+
 
