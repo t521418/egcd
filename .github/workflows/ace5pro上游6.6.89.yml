@@ -295,11 +295,9 @@ jobs:
          make -j$(nproc) $MAKE_ARGS gki_defconfig
          make -j$(nproc) $MAKE_ARGS all
          # 修复这里
-         make -C tools/perf ARCH=arm64 LLVM=1 CC=clang NO_LIBTRACEEVENT=1
-         mkdir -p ../dist/AnyKernel3 ../dist/perf
          cp out/arch/arm64/boot/Image ../dist/
+         cp out/vmlinux ../dist/
          cp -r ../../AnyKernel3/* ../dist/AnyKernel3/
-         cp tools/perf/perf ../dist/perf/
 
       - name: 打kpm补丁
         if: ${{ fromJSON(github.event.inputs.ENABLE_KPM) }}
@@ -329,9 +327,9 @@ jobs:
           name: AnyKernel3_oneplus_ace5pro_${{ env.KSUVER }}_sukisu_自定义
           path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
 
-      - name: Upload perf binary
+      - name: Upload vmlinx binary
         uses: actions/upload-artifact@v4
         with:
-          name: perf-tool
-          path: kernel_workspace/kernel_platform/dist/perf/perf
+          name: vmlinux
+          path: kernel_workspace/kernel_platform/dist/vmlinux
 
