@@ -224,15 +224,6 @@ jobs:
           CONFIG_CRYPTO_LZ4K=y
           CONFIG_CRYPTO_LZ4KD=y
           CONFIG_CRYPTO_842=y
-          # 启用并设置默认 BBR 拥塞控制算法
-          CONFIG_TCP_CONG_ADVANCED=y
-          CONFIG_TCP_CONG_BBR=y
-          CONFIG_NET_SCH_FQ=y
-          CONFIG_TCP_CONG_BIC=n
-          CONFIG_TCP_CONG_CUBIC=n
-          CONFIG_TCP_CONG_WESTWOOD=n
-          CONFIG_TCP_CONG_HTCP=n
-          CONFIG_DEFAULT_TCP_CONG=bbr
           EOF
           # 移除构建流程中的 check_defconfig 校验
           sed -i 's/check_defconfig//' ./common/build.config.gki
