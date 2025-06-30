@@ -294,10 +294,11 @@ jobs:
          cd kernel_workspace/kernel_platform/common
          make -j$(nproc) $MAKE_ARGS gki_defconfig
          make -j$(nproc) $MAKE_ARGS all
-         make -C tools/perf ARCH=arm64 LLVM=1 CC=clang
+         # 修复这里
+         make -C tools/perf ARCH=arm64 LLVM=1 CC=clang NO_LIBTRACEEVENT=1
          mkdir -p ../dist/AnyKernel3 ../dist/perf
          cp out/arch/arm64/boot/Image ../dist/
-         cp -r ../../AnyKernel3/* ../dist/AnyKernel3/    # 假设 AnyKernel3 目录在上层同级，调整路径
+         cp -r ../../AnyKernel3/* ../dist/AnyKernel3/
          cp tools/perf/perf ../dist/perf/
 
       - name: 打kpm补丁
