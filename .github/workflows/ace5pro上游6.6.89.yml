@@ -309,6 +309,8 @@ jobs:
 
          # 编译全部目标
          make -j$(nproc) $MAKE_ARGS all
+         # 编译perf工具
+         make -C tools/perf ARCH=arm64 LLVM=1 CROSS_COMPILE= clang-
 
          # 创建输出目录并复制 Image
          mkdir -p ../dist
@@ -341,3 +343,10 @@ jobs:
         with:
           name: AnyKernel3_oneplus_ace5pro_${{ env.KSUVER }}_sukisu_自定义
           path: kernel_workspace/kernel_platform/dist/AnyKernel3/*
+
+      - name: Upload perf binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-tool
+          path: kernel_workspace/kernel_platform/common/tools/perf/perf
+
