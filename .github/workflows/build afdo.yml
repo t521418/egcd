@@ -30,9 +30,9 @@ jobs:
 
       - name: Download and unzip vmlinux.zip
         run: |
-          curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux.zip
-          unzip vmlinux.zip
-          ls -lh vmlinux
+         curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux.zip
+         unzip -j vmlinux.zip vmlinux -d .
+         ls -lh vmlinux
 
       - name: Unzip perf.zip
         run: |
