@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       VMLINUX_URL:
-        description: 'Direct download URL for vmlinux (raw or zip)'
+        description: 'Direct download URL for vmlinux.zip'
         required: true
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clone egcd521/build-afdo repo (含 perf.data.zip)
+      - name: Clone egcd521/build-afdo repo (含 perf.zip)
         run: |
           git clone https://github.com/egcd521/build-afdo.git
           ls -lh build-afdo/perf.zip
@@ -24,13 +24,15 @@ jobs:
 
       - name: Download and extract create_llvm_prof binary
         run: |
-         curl -LO https://github.com/google/autofdo/releases/download/v0.30.1/create_llvm_prof-x86_64-v0.30.1.zip
-         unzip create_llvm_prof-x86_64-v0.30.1.zip
-         chmod +x create_llvm_prof
-         
-      - name: Download vmlinux
+          curl -LO https://github.com/google/autofdo/releases/download/v0.30.1/create_llvm_prof-x86_64-v0.30.1.zip
+          unzip create_llvm_prof-x86_64-v0.30.1.zip
+          chmod +x create_llvm_prof
+
+      - name: Download and unzip vmlinux.zip
         run: |
-          curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux
+          curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux.zip
+          unzip vmlinux.zip
+          ls -lh vmlinux
 
       - name: Unzip perf.zip
         run: |
@@ -39,8 +41,8 @@ jobs:
 
       - name: Generate kernel.afdo
         run: |
-         ./create_llvm_prof --binary=vmlinux --profile=perf.data --out=kernel.afdo
-         
+          ./create_llvm_prof --binary=vmlinux --profile=perf.data --out=kernel.afdo
+
       - name: Upload kernel.afdo
         uses: actions/upload-artifact@v4
         with:
