@@ -3,11 +3,8 @@ name: Generate Kernel AFDO
 on:
   workflow_dispatch:
     inputs:
-      PERF_DATA_URL:
-        description: 'Download URL for perf.data'
-        required: true
       VMLINUX_URL:
-        description: 'Download URL for vmlinux'
+        description: 'Download URL for vmlinux (artifact .zip or .raw)'
         required: true
 
 jobs:
@@ -15,13 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout this repo
+      - name: Checkout current repo (with perf.data.zip)
         uses: actions/checkout@v4
 
-      - name: Install dependencies for autofdo
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ zlib1g-dev
+          sudo apt install -y cmake g++ unzip zlib1g-dev
 
       - name: Clone and build create_afdo
         run: |
@@ -31,10 +28,14 @@ jobs:
           make -j$(nproc)
           cp create_afdo $GITHUB_WORKSPACE/
 
-      - name: Download perf.data and vmlinux from artifacts
+      - name: Download vmlinux
         run: |
-          curl -L "${{ github.event.inputs.PERF_DATA_URL }}" -o perf.data
           curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux
+
+      - name: Unzip perf.data.zip
+        run: |
+          unzip perf.data.zip
+          ls -lh perf.data
 
       - name: Generate kernel.afdo
         run: |
