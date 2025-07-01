@@ -10,15 +10,21 @@ on:
 jobs:
   generate-afdo:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout current repo (with perf.data.zip)
-        uses: actions/checkout@v4
-
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y cmake g++ unzip zlib1g-dev
+
+      - name: Clone build-afdo repo (with perf.data.zip)
+        run: |
+          git clone https://github.com/egcd521/build-afdo.git
+          ls build-afdo/perf.data.zip
+
+      - name: Unzip perf.data.zip
+        run: |
+          unzip build-afdo/perf.data.zip -d .
+          ls -lh perf.data
 
       - name: Clone and build create_afdo
         run: |
@@ -31,11 +37,6 @@ jobs:
       - name: Download vmlinux
         run: |
           curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux
-
-      - name: Unzip perf.data.zip
-        run: |
-          unzip perf.data.zip
-          ls -lh perf.data
 
       - name: Generate kernel.afdo
         run: |
