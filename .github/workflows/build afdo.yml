@@ -1,0 +1,48 @@
+name: Generate Kernel AFDO
+
+on:
+  workflow_dispatch:
+    inputs:
+      PERF_DATA_URL:
+        description: 'Download URL for perf.data'
+        required: true
+      VMLINUX_URL:
+        description: 'Download URL for vmlinux'
+        required: true
+
+jobs:
+  generate-afdo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies for autofdo
+        run: |
+          sudo apt update
+          sudo apt install -y cmake g++ zlib1g-dev
+
+      - name: Clone and build create_afdo
+        run: |
+          git clone https://github.com/google/autofdo.git
+          cd autofdo
+          cmake -DCMAKE_BUILD_TYPE=Release .
+          make -j$(nproc)
+          cp create_afdo $GITHUB_WORKSPACE/
+
+      - name: Download perf.data and vmlinux from artifacts
+        run: |
+          curl -L "${{ github.event.inputs.PERF_DATA_URL }}" -o perf.data
+          curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux
+
+      - name: Generate kernel.afdo
+        run: |
+          chmod +x create_afdo
+          ./create_afdo --binary=vmlinux --profile=perf.data --out=kernel.afdo
+
+      - name: Upload kernel.afdo
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-afdo
+          path: kernel.afdo
