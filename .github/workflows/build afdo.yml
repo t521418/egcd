@@ -4,44 +4,38 @@ on:
   workflow_dispatch:
     inputs:
       VMLINUX_URL:
-        description: 'Download URL for vmlinux (artifact .zip or .raw)'
+        description: 'Direct download URL for vmlinux (raw or zip)'
         required: true
 
 jobs:
   generate-afdo:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Install dependencies
-        run: |
-         sudo apt update
-         sudo apt install -y cmake g++ unzip zlib1g-dev \
-         libprotobuf-dev protobuf-compiler
+      - name: Checkout repo (with perf.data.zip)
+        uses: actions/checkout@v4
 
-      - name: Clone build-afdo repo (with perf.data.zip)
+      - name: Install tools
         run: |
-          git clone https://github.com/egcd521/build-afdo.git
-          ls build-afdo/perf.data.zip
+          sudo apt update
+          sudo apt install -y unzip curl
 
-      - name: Unzip perf.data.zip
+      - name: Download prebuilt create_afdo
         run: |
-          unzip build-afdo/perf.data.zip -d .
-          ls -lh perf.data
+          curl -LO https://github.com/google/autofdo/releases/download/v0.21/create_afdo
+          chmod +x create_afdo
 
-      - name: Clone and build create_afdo
-        run: |
-          git clone https://github.com/google/autofdo.git
-          cd autofdo
-          cmake -DCMAKE_BUILD_TYPE=Release .
-          make -j$(nproc)
-          cp create_afdo $GITHUB_WORKSPACE/
-
-      - name: Download vmlinux
+      - name: Download vmlinux from input URL
         run: |
           curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux
 
+      - name: Unzip perf.data.zip
+        run: |
+          unzip perf.data.zip
+          ls -lh perf.data
+
       - name: Generate kernel.afdo
         run: |
-          chmod +x create_afdo
           ./create_afdo --binary=vmlinux --profile=perf.data --out=kernel.afdo
 
       - name: Upload kernel.afdo
