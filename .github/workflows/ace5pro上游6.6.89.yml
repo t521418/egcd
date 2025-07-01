@@ -224,6 +224,36 @@ jobs:
           CONFIG_CRYPTO_LZ4K=y
           CONFIG_CRYPTO_LZ4KD=y
           CONFIG_CRYPTO_842=y
+          # === 必备：性能分析支持 ===
+          CONFIG_PERF_EVENTS=y
+          CONFIG_HW_PERF_EVENTS=y
+
+          # === 必备：调试符号生成（用于 vmlinux 和 afdo）===
+          CONFIG_DEBUG_INFO=y
+          CONFIG_DEBUG_INFO_SPLIT=n
+          CONFIG_DEBUG_INFO_REDUCED=n
+          CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT=y
+
+          # === 推荐开启：支持调用图（AutoFDO 依赖）===
+          CONFIG_FRAME_POINTER=y
+
+          # === 可选但推荐：支持 kprobe/ftrace/stacktrace 调试增强 ===
+          CONFIG_KPROBES=y
+          CONFIG_KPROBE_EVENTS=y
+          CONFIG_FUNCTION_TRACER=y
+          CONFIG_FTRACE=y
+          CONFIG_STACKTRACE=y
+
+          # === 建议开启：通用调试支持 ===
+          CONFIG_DEBUG_KERNEL=y
+          CONFIG_DEBUG_MISC=y
+
+          # === 可选（部分架构）: kallsyms 提供符号，perf report 可用 ===
+          CONFIG_KALLSYMS=y
+          CONFIG_KALLSYMS_ALL=y
+
+          # === 禁用无关调试优化（减少 strip 可能）===
+          CONFIG_STRIP_ASM_SYMS=n
           EOF
           # 移除构建流程中的 check_defconfig 校验
           sed -i 's/check_defconfig//' ./common/build.config.gki
