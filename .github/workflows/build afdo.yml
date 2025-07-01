@@ -22,11 +22,10 @@ jobs:
           sudo apt update
           sudo apt install -y unzip curl
 
-      - name: Download prebuilt create_afdo
+      - name: Download and extract create_afdo binary
         run: |
-         curl -LO https://github.com/google/autofdo/releases/download/v0.21/linux-x86_64-autofdo-v0.21.tar.gz
-         tar -xf linux-x86_64-autofdo-v0.21.tar.gz
-         cp linux-x86_64-autofdo-v0.21/create_afdo .
+         curl -LO https://github.com/google/autofdo/releases/download/v0.30.1/create_llvm_prof-x86_64-v0.30.1.zip
+         unzip create_llvm_prof-x86_64-v0.30.1.zip
          chmod +x create_afdo
 
       - name: Download vmlinux
