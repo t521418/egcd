@@ -15,7 +15,7 @@ jobs:
       - name: Clone egcd521/build-afdo repo (含 perf.data.zip)
         run: |
           git clone https://github.com/egcd521/build-afdo.git
-          ls -lh build-afdo/perf.data.zip
+          ls -lh build-afdo/perf.zip
 
       - name: Install tools
         run: |
@@ -32,9 +32,9 @@ jobs:
         run: |
           curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux
 
-      - name: Unzip perf.data.zip
+      - name: Unzip perf.zip
         run: |
-          unzip build-afdo/perf.data.zip
+          unzip build-afdo/perf.zip
           ls -lh perf.data
 
       - name: Generate kernel.afdo
