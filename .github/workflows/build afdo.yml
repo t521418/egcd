@@ -22,12 +22,12 @@ jobs:
           sudo apt update
           sudo apt install -y unzip curl
 
-      - name: Download and extract create_afdo binary
+      - name: Download and extract create_llvm_prof binary
         run: |
          curl -LO https://github.com/google/autofdo/releases/download/v0.30.1/create_llvm_prof-x86_64-v0.30.1.zip
          unzip create_llvm_prof-x86_64-v0.30.1.zip
-         chmod +x create_afdo
-
+         chmod +x create_llvm_prof
+         
       - name: Download vmlinux
         run: |
           curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux
@@ -39,8 +39,8 @@ jobs:
 
       - name: Generate kernel.afdo
         run: |
-          ./create_afdo --binary=vmlinux --profile=perf.data --out=kernel.afdo
-
+         ./create_llvm_prof --binary=vmlinux --profile=perf.data --out=kernel.afdo
+         
       - name: Upload kernel.afdo
         uses: actions/upload-artifact@v4
         with:
