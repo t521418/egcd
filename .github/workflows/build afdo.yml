@@ -24,8 +24,10 @@ jobs:
 
       - name: Download prebuilt create_afdo
         run: |
-          curl -LO https://github.com/google/autofdo/releases/download/v0.21/create_afdo
-          chmod +x create_afdo
+         curl -LO https://github.com/google/autofdo/releases/download/v0.21/linux-x86_64-autofdo-v0.21.tar.gz
+         tar -xf linux-x86_64-autofdo-v0.21.tar.gz
+         cp linux-x86_64-autofdo-v0.21/create_afdo .
+         chmod +x create_afdo
 
       - name: Download vmlinux
         run: |
