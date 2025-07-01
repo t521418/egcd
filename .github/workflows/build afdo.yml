@@ -12,11 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout build-afdo repo (with perf.data.zip)
-        uses: actions/checkout@v4
-        with:
-          repository: egcd521/build-afdo  # 你的仓库名
-          ref: main  # 目标分支
+      - name: Clone egcd521/build-afdo repo (含 perf.data.zip)
+        run: |
+          git clone https://github.com/egcd521/build-afdo.git
+          ls -lh build-afdo/perf.data.zip
 
       - name: Install tools
         run: |
@@ -28,13 +27,13 @@ jobs:
           curl -LO https://github.com/google/autofdo/releases/download/v0.21/create_afdo
           chmod +x create_afdo
 
-      - name: Download vmlinux from input URL
+      - name: Download vmlinux
         run: |
           curl -L "${{ github.event.inputs.VMLINUX_URL }}" -o vmlinux
 
-      - name: Unzip perf.data.zip from the repo
+      - name: Unzip perf.data.zip
         run: |
-          unzip build-afdo/perf.data.zip -d .
+          unzip build-afdo/perf.data.zip
           ls -lh perf.data
 
       - name: Generate kernel.afdo
