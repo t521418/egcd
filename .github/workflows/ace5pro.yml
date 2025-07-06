@@ -217,10 +217,10 @@ jobs:
          cd common
          git add -A && git commit -a -m "BUILD Kernel"
 
-      - name: Add make name
+      - name: 修改 setlocalversion 拼接顺序
         run: |
          cd kernel_workspace/kernel_platform
-         sed -i '186s|echo ".*"|echo "${KERNELVERSION}${scm_version}${config_localversion}"|' common/scripts/setlocalversion
+         sed -i '186s|echo ".*"|echo "${KERNELVERSION}${scm_version}${file_localversion}${config_localversion}${LOCALVERSION}${local_version}"|' common/scripts/setlocalversion
          sed -i "s/\${scm_version}/${{ github.event.inputs.KERNEL_NAME }}/g" ./common/scripts/setlocalversion
          
       - name: 设置 CONFIG_LOCALVERSION
