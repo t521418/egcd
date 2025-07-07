@@ -214,7 +214,7 @@ jobs:
 
       - name: 注入内核版本名后缀
         run: |
-         sed -i "186s|echo \".*\"|echo \"\${KERNELVERSION}${{ github.event.inputs.KERNEL_NAME }}\${config_localversion}\"|" common/scripts/setlocalversion
+         sed -i "186s|echo \".*\"|echo \"\${KERNELVERSION}${{ github.event.inputs.KERNEL_NAME }}\${config_localversion}\"|" ./common/scripts/setlocalversion
          
       - name: 设置 CONFIG_LOCALVERSION
         run: |
