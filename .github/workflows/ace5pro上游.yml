@@ -212,10 +212,15 @@ jobs:
          cd common
          git add -A && git commit -a -m "BUILD Kernel"
 
-      - name: 注入内核版本名后缀
+      - name: 修改内核版本拼接逻辑为占位符（scm_version）
         run: |
          cd kernel_workspace/kernel_platform
-         sed -i "186s|echo \".*\"|echo \"\${KERNELVERSION}${{ github.event.inputs.KERNEL_NAME }}\${config_localversion}\"|" ./common/scripts/setlocalversion
+         sed -i '186s|echo ".*"|echo "${KERNELVERSION}${scm_version}${config_localversion}"|' ./common/scripts/setlocalversion
+
+      - name: 替换 scm_version 为 KERNEL_NAME
+        run: |
+         cd kernel_workspace/kernel_platform
+         sed -i "s|\${scm_version}|${{ github.event.inputs.KERNEL_NAME }}|g" ./common/scripts/setlocalversion
          
       - name: 设置 CONFIG_LOCALVERSION
         run: |
