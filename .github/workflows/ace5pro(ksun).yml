@@ -231,24 +231,6 @@ jobs:
           cd kernel_workspace/kernel_platform/
           git clone https://github.com/egcd521/afdo.git
 
-      - name: 尝试修复报错
-        run: |
-          sed -i '/struct task_struct {/,/};/ s|^\(.*\);$|\1;\
-          #ifdef CONFIG_KSU_SUSFS\
-          unsigned int susfs_task_state;\
-          #endif|' include/linux/sched.h && \
-          mkdir -p include/linux && \
-          cat > include/linux/susfs.h <<EOF
-          #ifndef _LINUX_SUSFS_H
-          #define _LINUX_SUSFS_H
-
-          #define TASK_STRUCT_NON_ROOT_USER_APP_PROC 0x00000001
-
-          #endif
-          EOF
-          && sed -i '1i#include <linux/susfs.h>' drivers/kernelsu/core_hook.c && \
-          scripts/config --enable CONFIG_KSU_SUSFS && yes "" | make olddefconfig
-            
       - name: Set build timestamp
         run: |         
          export SOURCE_DATE_EPOCH=$(date -d "Tue Dec 17 23:36:49 UTC 2024" +%s)
