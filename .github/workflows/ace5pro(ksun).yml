@@ -127,7 +127,7 @@ jobs:
          cd kernel_workspace
          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}
          cd susfs4ksu
-         git reset --hard 0ed9845a3f6ed624d55484384f2b414a7527fc3b
+         git reset --hard ad5692617afb590dbac0c4b871b2e12bc4908f25
          cd ../
          git clone --depth=1 https://github.com/SukiSU-Ultra/SukiSU_patch.git
          git clone https://$TOKEN@github.com/egcd521/111.git
