@@ -132,7 +132,6 @@ jobs:
          cd kernel_platform
          cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch ./common/
          cp ../kernel_patches/next/syscall_hooks.patch ./common/
-         cp ../kernel_patches/next/0001-kernel-implement-susfs-v1.5.8-KernelSU-Next-v1.0.8.patch ./KernelSU-Next/
          cp ../kernel_patches/next/susfs_fix_patches/v1.5.9/fix_core_hook.c.patch ./KernelSU-Next/
          cp ../kernel_patches/next/susfs_fix_patches/v1.5.9/fix_apk_sign.c.patch ./KernelSU-Next/
          cp ../kernel_patches/next/susfs_fix_patches/v1.5.9/fix_ksud.c.patch ./KernelSU-Next/
@@ -145,7 +144,6 @@ jobs:
          cp -r ../SukiSU_patch/other/zram/lz4k_oplus ./common/lib/ || true
          cp ../111/boot.patch ./common/
          cd ./KernelSU-Next
-         patch -p1 < 0001-kernel-implement-susfs-v1.5.8-KernelSU-Next-v1.0.8.patch || true
          patch -p1 --fuzz=3 --forward < fix_apk_sign.c.patch || true
          patch -p1 --fuzz=3 --forward < fix_core_hook.c.patch || true
          patch -p1 --fuzz=3 --forward < fix_ksud.c.patch || true
