@@ -126,9 +126,6 @@ jobs:
          set -e
          cd kernel_workspace
          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}
-         cd susfs4ksu
-         git reset --hard ad5692617afb590dbac0c4b871b2e12bc4908f25
-         cd ../
          git clone --depth=1 https://github.com/SukiSU-Ultra/SukiSU_patch.git
          git clone https://$TOKEN@github.com/egcd521/111.git
          git clone https://github.com/WildPlusKernel/kernel_patches.git
@@ -154,7 +151,7 @@ jobs:
           # Replace next_hooks.patch with syscall_hooks.patch
           cp ../../kernel_patches/69_hide_stuff.patch ./
           patch -p1 -F 3 < 69_hide_stuff.patch
-          patch -p1 -F 3 < syscall_hooks.patch
+          patch -p1 --fuzz=3 < scope_min_manual_hooks_v1.4.patch
           patch -s -p1 -F 3 < boot.patch
           echo "✅ SUSFS 和 syscall_hooks patch 应用完成"
 
