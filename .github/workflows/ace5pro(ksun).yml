@@ -135,7 +135,7 @@ jobs:
          cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./KernelSU-Next/
          cp ../zzh_patch/next-patch/* ./KernelSU-Next/
          cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
-         cd ./common/
+         cd ../../
          # lz4补丁
          echo 'lz升级'
          # 删除lz4库旧有文件
