@@ -135,13 +135,10 @@ jobs:
          cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./KernelSU-Next/
          cp ../zzh_patch/next-patch/* ./KernelSU-Next/
          cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
-         # lz4补丁
          cp -r ../zzh_patch/zram/lz4/* ./lib/lz4/
          cp -r ../zzh_patch/zram/include/linux/* ./include/linux/
          cp -r ../zzh_patch/zram/${{ inputs.kernel_version }}/lz4_1.10.0.patch ./common/
          cd ./common
-         echo 'lz升级'
-         # 删除lz4库旧有文件
           files=(
               "lib/lz4/lz4_compress.c"
               "lib/lz4/lz4_decompress.c"
