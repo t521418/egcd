@@ -135,10 +135,20 @@ jobs:
          cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./KernelSU-Next/
          cp ../zzh_patch/next-patch/* ./KernelSU-Next/
          cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
+         cd ./common/
          # lz4补丁
+         echo 'lz升级'
+         # 删除lz4库旧有文件
+          files=(
+              "lib/lz4/lz4_compress.c"
+              "lib/lz4/lz4_decompress.c"
+              "lib/lz4/lz4defs.h"
+              "lib/lz4/lz4hc_compress.c"
+          )
          cp -r ../zzh_patch/zram/lz4/* ./lib/lz4/
          cp -r ../zzh_patch/zram/include/linux/* ./include/linux/
          cp -r ../zzh_patch/zram/${{ inputs.kernel_version }}/lz4_1.10.0.patch ./common/
+         cd kernel_platform
          cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
          cp -r ../SukiSU_patch/other/zram/lz4k/include/linux/* ./common/include/linux || true
          cp -r ../SukiSU_patch/other/zram/lz4k/lib/* ./common/lib || true
@@ -152,7 +162,7 @@ jobs:
          patch -p1 --fuzz=3 --forward < ksud.patch
          patch -p1 --fuzz=3 --forward < selinux.patch
          patch -p1 --fuzz=3 --forward < rules.c.patch
-         cd ../common
+         cd ./common/
          if [[ "${{ github.event.inputs.FEIL }}" == "oneplus_13" || "${{ github.event.inputs.FEIL }}" == "oneplus_ace5_pro" ]]; then
            sed -i 's/-32,12 +32,38/-32,11 +32,37/g' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
            sed -i '/#include <trace\/hooks\/fs.h>/d' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
