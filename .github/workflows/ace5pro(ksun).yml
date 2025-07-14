@@ -135,6 +135,10 @@ jobs:
          cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./KernelSU-Next/
          cp ../zzh_patch/next-patch/* ./KernelSU-Next/
          cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
+         # lz4补丁
+         cp -r ../zzh_patch/zram/lz4/* ./lib/lz4/
+         cp -r ../zzh_patch/zram/include/linux/* ./include/linux/
+         cp -r ../zzh_patch/zram/${{ inputs.kernel_version }}/lz4_1.10.0.patch ./common/
          cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
          cp -r ../SukiSU_patch/other/zram/lz4k/include/linux/* ./common/include/linux || true
          cp -r ../SukiSU_patch/other/zram/lz4k/lib/* ./common/lib || true
@@ -160,7 +164,8 @@ jobs:
           patch -p1 -F 3 < scope_min_manual_hooks_v1.4.patch
           patch -p1 -F 3 < 69_hide_stuff.patch
           patch -s -p1 -F 3 < boot.patch
-          echo "✅ SUSFS 和 syscall_hooks patch 应用完成"
+          patch -p1 -F 3 --fuzz=5 < lz4_1.10.0.patch
+          echo "✅ SUSFS 和 scope_min_manual_hooks_v1.4 patch 应用完成"
 
       - name: Apply lz4kd Patches
         run: |
