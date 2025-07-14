@@ -152,7 +152,7 @@ jobs:
          echo "⚠️ 文件不存在：$file"
          fi
          done
-         cd kernel_platform
+         cd ../
          cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
          cp -r ../SukiSU_patch/other/zram/lz4k/include/linux/* ./common/include/linux || true
          cp -r ../SukiSU_patch/other/zram/lz4k/lib/* ./common/lib || true
