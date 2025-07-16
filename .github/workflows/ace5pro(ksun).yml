@@ -129,7 +129,7 @@ jobs:
          git clone --depth=1 https://github.com/SukiSU-Ultra/SukiSU_patch.git
          git clone https://$TOKEN@github.com/egcd521/111.git
          git clone https://github.com/WildPlusKernel/kernel_patches.git
-         git clone https://github.com/zzh20188/GKI_KernelSU_SUSFS.git zzh_patch
+         git clone https://github.com/egcd123/GKI_KernelSU_SUSFS.git zzh_patch
          cd kernel_platform
          cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch ./common/
          cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./KernelSU-Next/
@@ -181,9 +181,7 @@ jobs:
           patch -s -p1 -F 3 < boot.patch || true
           patch -p1 -F 3 --fuzz=5 < lz4_1.10.0.patch || true
           echo "✅ SUSFS 和 scope_min_manual_hooks_v1.4 patch 应用完成"
-          # 修复next报错
-          sed -i '/^static inline int ksu_access_ok/,/^}/ s/^/\/\//' drivers/kernelsu/kernel_compat.c
-
+          
       - name: Apply lz4kd Patches
         run: |
          set -e
