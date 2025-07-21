@@ -129,7 +129,7 @@ jobs:
          git clone --depth=1 https://github.com/SukiSU-Ultra/SukiSU_patch.git
          git clone https://$TOKEN@github.com/egcd521/111.git
          git clone https://github.com/WildPlusKernel/kernel_patches.git
-         git clone https://github.com/zzh20188/GKI_KernelSU_SUSFS.git zzh_patch
+         git clone https://github.com/egcd521/GKI_KernelSU_SUSFS.git zzh_patch
          cd kernel_platform
          cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch ./common/
          cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./KernelSU-Next/
@@ -168,6 +168,7 @@ jobs:
          patch -p1 --fuzz=3 --forward < rules.c.patch || true
          patch -p1 --fuzz=3 --forward < sucompat.c.patch || true
          patch -p1 --fuzz=3 --forward < kernel_compat.c.patch || true
+         patch -p1 --fuzz=3 --forward < min_scope_syscall_hooks_v1.4.patch || true
          cd ../
          cd ./common/
          if [[ "${{ github.event.inputs.FEIL }}" == "oneplus_13" || "${{ github.event.inputs.FEIL }}" == "oneplus_ace5_pro" ]]; then
